@@ -39,30 +39,58 @@ class VideoLabel(Label):
 class PointsLabel(Label): 
     def __init__(self,root):
         Label.__init__(self,root)
-        self.selected_points = []
-        self.labels = ['TR','TL','DR','DL']
-    def addPoint(self,x,y):
-        selected = 0
-        if selected < 3:
-            point = Point(self,self.labels[selected],x,y)
-            point.pack()
+        point1 = Point(self,"TR")
+        point2 = Point(self,"TL")
+        point3 = Point(self,"BR")
+        point4 = Point(self,"BL")
+
+        self.points = [point1,point2,point3,point4]
+
+        point1.grid(row=0,sticky=W) 
+        point2.grid(row=1,sticky=W)
+        point3.grid(row=2,sticky=W)
+        point4.grid(row=3,sticky=W)
+    
+    def addPoint(self,x,y): 
+        for i,p in enumerate( self.points):
+            if not p.selected: 
+                p.select_point(x,y)
+                if i == 3 :
+                    self.endButton = Button(self,text="Continua",command=self.SelectPoints)
+                    self.endButton.grid(sticky=S+W,row=5)
+                break
+    def SelectPoints(self): 
+        return 0 
+
+
+        
 
 
             
 class Point(Frame):
     def unselect_yourself(self):
-        self.grid_forget()
         self.selected = False
-    def __init__(self,root,label,x,y):
+        label = "CORNER " + self.corner 
+        self.label = label
+        self.text.configure(text=label)
+    def __init__(self,root,label):
         Frame.__init__(self,root)
-        self.selected = True
+        self.selected = False 
 
-        label = "CORNER " + label + ": " + str(x) + ", " + str(y) 
+        textlabel = "CORNER " + label 
+        self.label = textlabel
+        self.corner = label
         self.button = Button(self,text = "X",command=self.unselect_yourself )
-        self.text = Label(self,text = label)
+        self.text = Label(self,text = textlabel)
 
-        self.text.pack(side=RIGHT)
-        self.button.pack(side=LEFT)
+        self.text.grid(row=0,column=1,sticky=W)
+        self.button.grid(row=0,column=0,sticky=W)
+
+    def select_point(self,x,y): 
+        self.selected = True
+        label = self.label + ": " + str(x) + ", "+ str(y)
+        self.label = label
+        self.text.configure(text=label)
 
 
 

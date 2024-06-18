@@ -18,7 +18,7 @@ class App:
 
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
-        self.transform_frame =  Label(self.root,image=self.placeholder)                            # Frame for transformed input 
+        self.transform_frame =  Label(self.root,image=self.placeholder)      # Frame for transformed input 
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
         self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
@@ -29,10 +29,10 @@ class App:
         self.transform_frame.grid(row=0,column=2,sticky=W) 
 
         # Inicializaoms los puntos a seleccionar
-        point0 = point(self.points_frame,-1,-1,"TR",0)
-        point1 = point(self.points_frame,-1,-1,"TL",1)
-        point2 = point(self.points_frame,-1,-1,"BR",2)
-        point3 = point(self.points_frame,-1,-1,"BL",3)
+        point0 = point(self.points_frame,-1,-1,"TL",0)
+        point1 = point(self.points_frame,-1,-1,"TR",1)
+        point2 = point(self.points_frame,-1,-1,"BL",2)
+        point3 = point(self.points_frame,-1,-1,"BR",3)
 
         self.selected_points = [point0,point1,point2,point3]
         self.TMat = None
@@ -46,20 +46,20 @@ class App:
         self.video_frame.after(10,self.showFrame)
 
     def showFrame(self): 
-        cvImage = capture_frame(self.captura)
+        self.cvImage = capture_frame(self.captura)
 
-        image = Image.fromarray(cvImage)
+        image = Image.fromarray(self.cvImage)
         img = ImageTk.PhotoImage(image = image)
 
         self.capture_image= img
         self.video_frame.configure(image=img)
         self.video_frame.after(10,self.showFrame)
 
+    # Calcula la transformada del frame i lo muestra en el recuadro adecuado
     def showTransform(self): 
 
 
-        cvImage = capture_frame(self.captura)
-        dst = cv2.warpPerspective(cvImage, self.TMat, (500,500))
+        dst = cv2.warpPerspective(self.cvImage, self.TMat, (500,500))
 
         image = Image.fromarray(dst)
         dst = ImageTk.PhotoImage(image = image)

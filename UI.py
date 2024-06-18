@@ -9,15 +9,16 @@ def capture_frame(capture):
 class App: 
     def __init__(self): 
         self.root = Tk()
+        self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(0)
 
-        #Temporal Despres seran captures de opencv
-        self.img = ImageTk.PhotoImage(Image.open("blank.jpg"))
-        self.img1 =ImageTk.PhotoImage(Image.open("check.jpg"))
+
+        # Placeholder per la homografia 
+        self.placeholder =ImageTk.PhotoImage(Image.open("check.jpg"))
 
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
-        self.transform_frame =  Label(self.root,image=self.img1)                            # Frame for transformed input 
+        self.transform_frame =  Label(self.root,image=self.placeholder)                            # Frame for transformed input 
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
         self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
@@ -34,6 +35,9 @@ class App:
         point3 = point(self.points_frame,-1,-1,"BL",3)
 
         self.selected_points = [point0,point1,point2,point3]
+        self.TMat = None
+        self.coords = None
+        self.dstPoints = np.array([[0,0],[0,500],[500,0],[500,500]])
 
         # Bindings de teclas. 
         self.video_frame.bind('<Button-1>',self.addPoint) # Registra un punto al hacer clic derecho
@@ -47,11 +51,21 @@ class App:
         image = Image.fromarray(cvImage)
         img = ImageTk.PhotoImage(image = image)
 
-        self.photo_image = img
+        self.capture_image= img
         self.video_frame.configure(image=img)
         self.video_frame.after(10,self.showFrame)
 
+    def showTransform(self): 
 
+
+        cvImage = capture_frame(self.captura)
+        dst = cv2.warpPerspective(cvImage, self.TMat, (500,500))
+
+        image = Image.fromarray(dst)
+        dst = ImageTk.PhotoImage(image = image)
+        self.transform_image= dst 
+        self.transform_frame.configure(image=dst)
+        self.transform_frame.after(30,self.showTransform)
 
     # Completa la calibracion y muestra la transformacion 
     def nextStage(self):
@@ -59,6 +73,10 @@ class App:
         for point in self.selected_points:
             coords.append( [ point.getCoord() ] )
         coords = np.array(coords)
+        self.coords = coords
+        M,_ = cv2.findHomography(self.coords,self.dstPoints)
+        self.TMat = M
+        self.video_frame.after(10,self.showTransform)
 
     # Añade las coordenadas a un punto nuevo 
     def addPoint(self,event): 

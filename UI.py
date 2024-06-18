@@ -4,8 +4,16 @@ from PIL import ImageTk, Image
 import numpy as np
 import cv2
 import Board
+# Para debug
+from matplotlib import pyplot as plt
 def capture_frame(capture):
     return cv2.cvtColor(capture.read()[1],cv2.COLOR_BGR2RGB)
+def getMask(size): 
+    blank = np.zeros((size,size),dtype=bool)
+    for i in range(0,size,size//8): 
+        blank[i,:] = True
+        blank[:,i] = True
+    return blank
 class App: 
     def __init__(self): 
         
@@ -23,11 +31,13 @@ class App:
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
         self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
+        self.moveButton = Button(self.points_frame,text="MOVE",command=self.getMove)   # Button for starting transformation
 
         # Mostramos Objetos TK 
         self.video_frame.grid(row=0,column=0,sticky=E)
         self.points_frame.grid(row=0,column=1,sticky=NW,rowspan=3)
         self.transform_frame.grid(row=0,column=2,sticky=W) 
+        self.moveButton.grid(row= 10)
 
         # Inicializaoms los puntos a seleccionar
         point0 = point(self.points_frame,-1,-1,"TL",0)
@@ -38,15 +48,25 @@ class App:
         self.selected_points = [point0,point1,point2,point3]
         self.TMat = None
         self.coords = None
-        self.dstPoints = np.array([[0,0],[0,500],[500,0],[500,500]])
-        self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,500]),np.array([500,0]),np.array([500,500]))
-
+        self.dstPoints = np.array([[0,0],[0,512],[512,0],[512,512]])
+        self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,512]),np.array([512,0]),np.array([512,512]))
+        self.mask = getMask(512)
         # Bindings de teclas. 
         self.video_frame.bind('<Button-1>',self.addPoint) # Registra un punto al hacer clic derecho
         self.root.bind('<Escape>',quit)                   # Esc Cierra la aplicacion 
 
         self.video_frame.after(10,self.showFrame)
 
+    def getMove(self): 
+        image =self.cvDest 
+        image = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+        diffs = image - self.last_move
+        m = diffs < 20
+        diffs[m] = 0
+        diffs[~m] = 255
+
+        plt.imshow(diffs,'gray')
+        plt.show()
     def showFrame(self): 
         self.cvImage = capture_frame(self.captura)
 
@@ -61,8 +81,10 @@ class App:
     def showTransform(self): 
 
 
-        dst = cv2.warpPerspective(self.cvImage, self.TMat, (500,500))
-
+        wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
+        self.cvDest = wraped
+        dst = wraped.copy()
+        dst[self.mask,:] = 0
         image = Image.fromarray(dst)
         dst = ImageTk.PhotoImage(image = image)
         self.transform_image= dst 
@@ -79,7 +101,9 @@ class App:
         M,_ = cv2.findHomography(self.coords,self.dstPoints)
         self.TMat = M
         self.video_frame.after(10,self.showTransform)
-
+        dst = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
+        self.cvDest = dst
+        self.last_move =cv2.cvtColor(dst,cv2.COLOR_RGB2GRAY)
     # Añade las coordenadas a un punto nuevo 
     def addPoint(self,event): 
         for p in self.selected_points:

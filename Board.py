@@ -9,7 +9,6 @@ import numpy as np
 import cv2 as cv
 from itertools import product
 from matplotlib import pyplot as plt
-import App
 
 ## IMAGE TREATMENT FUNCTIONS ====================================================================================================================
 ##===============================================================================================================================================
@@ -327,7 +326,7 @@ def getLatticeLines(TL,TR,DL,DR):
     v_lines = np.concatenate([newT,newD],axis=1)
     h_lines = np.concatenate([newR,newL],axis=1)
 
-    return np.concatenate([v_lines,h_lines])
+    return np.concatenate([v_lines,h_lines]).astype(np.uint8)
 
 def getLattice(TL,TR,DL,DR):
     # we create the frame 

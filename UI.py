@@ -1,126 +1,123 @@
-from tkinter import *
-from tkinter import ttk
 
-from PIL import Image, ImageTk
-
+from tkinter import * 
+from PIL import ImageTk, Image
+import numpy as np
 import cv2
+
 def capture_frame(capture):
     return cv2.cvtColor(capture.read()[1],cv2.COLOR_BGR2RGB)
+class App: 
+    def __init__(self): 
+        self.root = Tk()
+        self.captura = cv2.VideoCapture(0)
 
-class VideoLabel(Label): 
+        #Temporal Despres seran captures de opencv
+        self.img = ImageTk.PhotoImage(Image.open("blank.jpg"))
+        self.img1 =ImageTk.PhotoImage(Image.open("check.jpg"))
 
-    def onRightclick(self,event): 
-        
-        x,y = event.x,event.y
-        self.selected_points.append([x,y])
+        # Initializamos objetos tk
+        self.video_frame =      Label(self.root)                             # Frame for video input
+        self.transform_frame =  Label(self.root,image=self.img1)                            # Frame for transformed input 
 
-    def onLeftclick(self,event): 
-        self.show_camera = False 
-    def show_frame(self):
-        cvImage = capture_frame(self.cap) 
+        self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
+        self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
 
-        for x,y in self.selected_points: 
-            cv2.circle(cvImage,(x,y),10,(255,0,0),-1)
+        # Mostramos Objetos TK 
+        self.video_frame.grid(row=0,column=0,sticky=E)
+        self.points_frame.grid(row=0,column=1,sticky=NW,rowspan=3)
+        self.transform_frame.grid(row=0,column=2,sticky=W) 
+
+        # Inicializaoms los puntos a seleccionar
+        point0 = point(self.points_frame,-1,-1,"TR",0)
+        point1 = point(self.points_frame,-1,-1,"TL",1)
+        point2 = point(self.points_frame,-1,-1,"BR",2)
+        point3 = point(self.points_frame,-1,-1,"BL",3)
+
+        self.selected_points = [point0,point1,point2,point3]
+
+        # Bindings de teclas. 
+        self.video_frame.bind('<Button-1>',self.addPoint) # Registra un punto al hacer clic derecho
+        self.root.bind('<Escape>',quit)                   # Esc Cierra la aplicacion 
+
+        self.video_frame.after(10,self.showFrame)
+
+    def showFrame(self): 
+        cvImage = capture_frame(self.captura)
 
         image = Image.fromarray(cvImage)
         img = ImageTk.PhotoImage(image = image)
 
         self.photo_image = img
-        self.configure(image=img)
-        if (self.show_camera): self.after(10,self.show_frame)
-        else : self.cap.release()
+        self.video_frame.configure(image=img)
+        self.video_frame.after(10,self.showFrame)
 
-    def __init__(self,root,capture,App):
-        Label.__init__(self,root)
-        self.cap = capture
-        self.selected_points = []
-        self.show_camera =True 
-        self.bind('<Button-1>',App.selectPoint)
-class PointsLabel(Label): 
-    def __init__(self,root):
-        Label.__init__(self,root)
-        point1 = Point(self,"TR")
-        point2 = Point(self,"TL")
-        point3 = Point(self,"BR")
-        point4 = Point(self,"BL")
 
-        self.points = [point1,point2,point3,point4]
 
-        point1.grid(row=0,sticky=W) 
-        point2.grid(row=1,sticky=W)
-        point3.grid(row=2,sticky=W)
-        point4.grid(row=3,sticky=W)
-    
-    def addPoint(self,x,y): 
-        for i,p in enumerate( self.points):
+    # Completa la calibracion y muestra la transformacion 
+    def nextStage(self):
+        coords = []
+        for point in self.selected_points:
+            coords.append( [ point.getCoord() ] )
+        coords = np.array(coords)
+
+    # Añade las coordenadas a un punto nuevo 
+    def addPoint(self,event): 
+        for p in self.selected_points:
             if not p.selected: 
-                p.select_point(x,y)
-                if i == 3 :
-                    self.endButton = Button(self,text="Continua",command=self.SelectPoints)
-                    self.endButton.grid(sticky=S+W,row=5)
+                p.setCoord(event.x,event.y)
                 break
-    def SelectPoints(self): 
-        return 0 
+        for p in self.selected_points:
+            if not p.selected: 
+                return
+        # Si todos los puntos estan seleccionados muestra el boton para terminar la calibracion 
+        self.spawnButton()
+    # Muestra el boton 
+    def spawnButton(self):
+        self.go_button.grid(sticky=S + W + E)
 
+         
 
-        
+class point: 
+    def __init__(self,parent,x,y,cornerTag,row): 
 
-
-            
-class Point(Frame):
-    def unselect_yourself(self):
-        self.selected = False
-        label = "CORNER " + self.corner 
-        self.label = label
-        self.text.configure(text=label)
-    def __init__(self,root,label):
-        Frame.__init__(self,root)
+        # Guardamos los valores necesarios
+        self.x = x
+        self.y = y
         self.selected = False 
-
-        textlabel = "CORNER " + label 
-        self.label = textlabel
-        self.corner = label
-        self.button = Button(self,text = "X",command=self.unselect_yourself )
-        self.text = Label(self,text = textlabel)
-
-        self.text.grid(row=0,column=1,sticky=W)
-        self.button.grid(row=0,column=0,sticky=W)
-
-    def select_point(self,x,y): 
-        self.selected = True
-        label = self.label + ": " + str(x) + ", "+ str(y)
-        self.label = label
-        self.text.configure(text=label)
-
-
-
-class app: 
-
-    def selectPoint(self,event): 
-        x,y = event.x,event.y
-        self.selected_points.append([x,y])
-        self.PointsLabel.addPoint(x,y)
-    def __init__(self): 
-
-        root = Tk()
-        root.bind('<Escape>', lambda e: root.quit()) 
-        self.root = root
-
-        cap = cv2.VideoCapture(0)
-        self.videoWindow = VideoLabel(root,cap,self)
-        self.PointsLabel = PointsLabel(root)
-
-        self.selected_points = []
-
-        self.videoWindow.pack(anchor=NE,fill=Y,side=LEFT)
-        self.PointsLabel.pack(anchor=NW,fill=X)
+        self.corner_tag = cornerTag
+        text = "Corner {0}:".format(cornerTag)
         
-        self.videoWindow.after(10,self.videoWindow.show_frame)
+        # Inicializamos los objetos TK 
+        self.point_label = Label(parent,text= text)
+        self.delete_button = Button(parent,text="X",command=self.unselect)
+
+        # Mostramos los objetos TK 
+        self.point_label.grid(row=row,column=0,sticky=W)
+        self.delete_button.grid(row=row,column=1,sticky=E )
+
+    # Deselecciona el punto, borra sus coordenadas. Llamada al hacer clic en el boton de la cruz
+    def unselect(self): 
+
+        self.x = -1
+        self.y = -1
+        self.selected = False
+        text = "Corner {0}:".format(self.corner_tag)
+        self.point_label.configure(text =text )
+
+    def getCoord(self):
+        return self.x,self.y
+
+    # Setea las coordenadas y actualiza el texto
+    def setCoord(self,x,y): 
+        self.x = x
+        self.y = y
+        self.selected = True
+        text = "Corner {0}: ({1}, {2})".format(self.corner_tag,x,y)
+        self.point_label.configure(text =text )
 
 def main():
-    App = app()
+    app = App()
     mainloop()
-
-
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
+        

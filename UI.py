@@ -16,7 +16,7 @@ def getMask(size):
     return blank
 def proecssImage(image): 
     im = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
-    Blured  = cv2.GaussianBlur(im,(11,11),0)
+    Blured  = cv2.GaussianBlur(im,(21,21),0)
     return Blured
 class App: 
     def __init__(self): 

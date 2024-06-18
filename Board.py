@@ -298,6 +298,37 @@ def findPoints(points,boardCorners):
         avg = np.array(distances).mean()
               
         return np.array(dstPoints),avg
+def getLatticeLines(TL,TR,DL,DR):
+    # Get the points : 
+    T = TR - TL
+    tu = T/ 8
+    D = DR - DL
+    du = D / 8
+    R = DR - TR
+    ru = R / 8
+    L = DL - TL 
+    lu = L / 8
+    
+    newT = [TL]
+    newD = [DL]
+    newR = [TR]
+    newL = [TL]
+    
+    for n in range(8): 
+        newT.append( TL + (n + 1) * tu )
+        newD.append( DL + (n + 1) * du )
+        newR.append( TR + (n + 1) * ru )
+        newL.append( TL + (n + 1) * lu )
+    
+    newT =np.array(newT)
+    newD =np.array(newD)
+    newR =np.array(newR) 
+    newL =np.array(newL) 
+    v_lines = np.concatenate([newT,newD],axis=1)
+    h_lines = np.concatenate([newR,newL],axis=1)
+
+    return np.concatenate([v_lines,h_lines])
+
 def getLattice(TL,TR,DL,DR):
     # we create the frame 
     T = TR - TL

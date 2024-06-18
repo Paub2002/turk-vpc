@@ -3,11 +3,12 @@ from tkinter import *
 from PIL import ImageTk, Image
 import numpy as np
 import cv2
-
+import Board
 def capture_frame(capture):
     return cv2.cvtColor(capture.read()[1],cv2.COLOR_BGR2RGB)
 class App: 
     def __init__(self): 
+        
         self.root = Tk()
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(0)
@@ -38,6 +39,7 @@ class App:
         self.TMat = None
         self.coords = None
         self.dstPoints = np.array([[0,0],[0,500],[500,0],[500,500]])
+        self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,500]),np.array([500,0]),np.array([500,500]))
 
         # Bindings de teclas. 
         self.video_frame.bind('<Button-1>',self.addPoint) # Registra un punto al hacer clic derecho

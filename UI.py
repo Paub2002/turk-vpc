@@ -14,6 +14,10 @@ def getMask(size):
         blank[i,:] = True
         blank[:,i] = True
     return blank
+def proecssImage(image): 
+    im = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+    Blured  = cv2.GaussianBlur(im,(11,11),0)
+    return Blured
 class App: 
     def __init__(self): 
         
@@ -58,12 +62,12 @@ class App:
         self.video_frame.after(10,self.showFrame)
 
     def getMove(self): 
-        image =self.cvDest 
-        image = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+        im =self.cvDest 
+        image = proecssImage(im)        
         diffs = image - self.last_move
-        m = diffs < 20
-        diffs[m] = 0
-        diffs[~m] = 255
+        m = np.logical_and( diffs > 10,diffs < 240) 
+        diffs[~m] = 0 
+        diffs[m] = 255
 
         plt.imshow(diffs,'gray')
         plt.show()
@@ -103,7 +107,7 @@ class App:
         self.video_frame.after(10,self.showTransform)
         dst = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
         self.cvDest = dst
-        self.last_move =cv2.cvtColor(dst,cv2.COLOR_RGB2GRAY)
+        self.last_move =proecssImage(dst)
     # Añade las coordenadas a un punto nuevo 
     def addPoint(self,event): 
         for p in self.selected_points:
@@ -124,8 +128,7 @@ class App:
 class point: 
     def __init__(self,parent,x,y,cornerTag,row): 
 
-        # Guardamos los valores necesarios
-        self.x = x
+
         self.y = y
         self.selected = False 
         self.corner_tag = cornerTag

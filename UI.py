@@ -52,7 +52,7 @@ class App:
         self.selected_points = [point0,point1,point2,point3]
         self.TMat = None
         self.coords = None
-        self.dstPoints = np.array([[0,0],[0,512],[512,0],[512,512]])
+        self.dstPoints = np.array([[0,512],[512,512],[0,0],[512,0]])
         self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,512]),np.array([512,0]),np.array([512,512]))
         self.mask = getMask(512)
         # Bindings de teclas. 

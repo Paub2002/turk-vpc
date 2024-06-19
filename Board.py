@@ -33,13 +33,13 @@ def canny(im):
     edge = cv.Canny(gray,threshold1= 100, threshold2=500,apertureSize=3)
     return edge
 def splitquare(im): 
-    size = 150 
     n = 8 
+    size = im.shape[0]//8
     splits = []
     for i in range(n): 
         for j in range(n): 
             splits.append(im[ i * size : (i + 1) * size , j * size  : (j + 1 ) * size ])
-    return splits
+    return np.array(splits)
 def getCornerSets(points,corners,im):
     
     iters = 7 # return set size = iters ^ 4 

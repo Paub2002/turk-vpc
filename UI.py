@@ -4,7 +4,11 @@ from PIL import ImageTk, Image
 import numpy as np
 import cv2
 import Board
+import chess
+import chess.svg
+
 # Para debug
+from cairosvg import svg2png
 from matplotlib import pyplot as plt
 board_indices = [
 "h1","g1","f1","e1","d1","c1","b1","a1",
@@ -28,6 +32,25 @@ def proecssImage(image):
     im = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
     Blured  = cv2.GaussianBlur(im,(11,11),0)
     return Blured
+
+def getLegalMove(board,sorted_squares): 
+    max_back = 3
+    indices_to_check = sorted_squares[63:63-max_back]
+    squares_to_check = []
+    for i in indices_to_check: 
+        squares_to_check.append(board_indices[i])
+    possible_moves = []
+    for i in range(max_back):
+        for j in range ( i , max_back):
+            possible_moves.append( squares_to_check[i] + squares_to_check[j] )
+            possible_moves.append( squares_to_check[j] + squares_to_check[i] )
+    for move in possible_moves: 
+        if move in board.possible_moves: 
+            return move 
+
+
+    
+
 class App: 
     def __init__(self): 
         
@@ -35,9 +58,13 @@ class App:
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(0)
 
+        self.Board = chess.Board()
+        self.boardsvg = chess.svg.board(self.Board, size=350)
 
+
+        im = Image.fromarray(svg2png(bytestring=self.boardsvg))
         # Placeholder per la homografia 
-        self.placeholder =ImageTk.PhotoImage(Image.open("check.jpg"))
+        self.placeholder =ImageTk.PhotoImage(image=im)
 
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
@@ -86,7 +113,9 @@ class App:
         
         means = np.mean(squares,axis=(1,2))
         a = means.argsort()
-        print (board_indices[a[63]],board_indices[a[62]])
+
+        legal_move = getLegalMove(self.board, a )
+
     def showFrame(self): 
         self.cvImage = capture_frame(self.captura)
 

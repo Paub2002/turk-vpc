@@ -35,21 +35,21 @@ def proecssImage(image):
 
 def getLegalMove(board,sorted_squares): 
     max_back = 3
-    indices_to_check = sorted_squares[63:63-max_back]
+    sorted_squares = sorted_squares[::-1]
+    indices_to_check = sorted_squares[:max_back]
     squares_to_check = []
     for i in indices_to_check: 
         squares_to_check.append(board_indices[i])
     possible_moves = []
     for i in range(max_back):
-        for j in range ( i , max_back):
+        for j in range ( i+1 , max_back):
             possible_moves.append( squares_to_check[i] + squares_to_check[j] )
             possible_moves.append( squares_to_check[j] + squares_to_check[i] )
     for move in possible_moves: 
-        if move in board.possible_moves: 
+        if chess.Move.from_uci(move) in board.legal_moves: 
             return move 
 
 
-    
 
 class App: 
     def __init__(self): 
@@ -58,17 +58,9 @@ class App:
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(0)
 
-        self.Board = chess.Board()
-        self.boardsvg = chess.svg.board(self.Board, size=350)
-
-
-        im = Image.fromarray(svg2png(bytestring=self.boardsvg))
-        # Placeholder per la homografia 
-        self.placeholder =ImageTk.PhotoImage(image=im)
-
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
-        self.transform_frame =  Label(self.root,image=self.placeholder)      # Frame for transformed input 
+        self.transform_frame =  Label(self.root)      # Frame for transformed input 
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
         self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
@@ -98,11 +90,25 @@ class App:
 
         self.video_frame.after(10,self.showFrame)
 
+        self.Board = chess.Board()
+        self.display_move()
+        self.transform = False
+    def display_move(self, move = ""):
+        if move != "":
+            self.Board.push_uci(move)    
+        else:
+            move = "initial_position"
+        
+        self.boardsvg = chess.svg.board(self.Board, size=500)
+        png = svg2png(bytestring=self.boardsvg,write_to= move + ".png")
+        im = Image.open(move + ".png")
+        self.Board_image = ImageTk.PhotoImage(image=im)
+        self.transform = False
+        self.transform_frame.configure(image=self.Board_image)
+
     def getMove(self): 
         im =self.cvDest 
         image = proecssImage(im)        
-        plt.imshow(image,'gray')
-        plt.show()
         diffs = image - self.last_move
         m = np.logical_and( diffs > 10,diffs < 240) 
         diffs[~m] = 0 
@@ -114,8 +120,10 @@ class App:
         means = np.mean(squares,axis=(1,2))
         a = means.argsort()
 
-        legal_move = getLegalMove(self.board, a )
+        legal_move = getLegalMove(self.Board, a )
+        #self.display_move(legal_move)
 
+        print(chess.Move.from_uci(legal_move))
     def showFrame(self): 
         self.cvImage = capture_frame(self.captura)
 
@@ -138,7 +146,7 @@ class App:
         dst = ImageTk.PhotoImage(image = image)
         self.transform_image= dst 
         self.transform_frame.configure(image=dst)
-        self.transform_frame.after(30,self.showTransform)
+        if self.transform == True : self.transform_frame.after(30,self.showTransform)
 
     # Completa la calibracion y muestra la transformacion 
     def nextStage(self):
@@ -153,6 +161,7 @@ class App:
         dst = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
         self.cvDest = dst
         self.last_move =proecssImage(dst)
+        self.transform = True
     # Añade las coordenadas a un punto nuevo 
     def addPoint(self,event): 
         for p in self.selected_points:

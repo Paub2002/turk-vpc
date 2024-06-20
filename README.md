@@ -19,3 +19,9 @@ pip install -r requeriments.txt
 ### Camera Placement
 ### Camera calibration 
 ### Game 
+
+## FFMPEG INSTALLATION
+### Go to this link https://github.com/BtbN/FFmpeg-Builds/releases
+### Download ffmpeg-master-latest-win64-gpl.zip
+### Extract it and copy the content of bin into your path
+### Enjoy

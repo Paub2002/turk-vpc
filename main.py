@@ -74,15 +74,14 @@ def es_negra(tablero, posicion):
 
 
 
-#/////////////////////////////////////////////////////////////////////////////////////////////////////////777
-def main_loop(move,fen_string,player_color):
+#/////////////////////////////////////////////////////////////////////////////////////////////////////////
+def main_loop(board,move):
     bad_move = False
     #stockfish.set_skill_level(4)
     stockfish.set_elo_rating(2000)
     
-    board = chess.Board(fen_string)
-    stockfish.set_fen_position(fen_string)
-    print(stockfish.get_board_visual())
+    stockfish.set_fen_position(board.fen())
+    #print(stockfish.get_board_visual())
     best_move = stockfish.get_best_move()
 
     initial_position = move[:2]
@@ -131,12 +130,32 @@ def main_loop(move,fen_string,player_color):
         print("final player: ", final_player)
     return stockfish.get_fen_position()
 
+def Player_moves(board,move): 
 
+    stockfish.set_elo_rating(2000)
+    stockfish.set_fen_position(board.fen())
 
-fen_string = "r1bqkb1r/pp1ppppp/2n2n2/2p5/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"
+    initial_player = stockfish.get_evaluation()
+    best_move = stockfish.get_best_move()
+    
+    stockfish.make_moves_from_current_position([move])
+    
+    initial_turk = stockfish.get_evaluation()
+    
+    points = abs(initial_turk['value'] - initial_player['value'])
+
+    if points >= GRAVE_ERROR:
+            player_move_alg = alg_to_alg(move, board)
+            best_move_alg = alg_to_alg(best_move, board)
+            text = request.chess_question(fen_string, player_move_alg, best_move_alg)
+            speech.text_to_speech(text)
+    else : 
+        print ("Good Move")
+
+#fen_string = "r1bqkb1r/pp1ppppp/2n2n2/2p5/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"
+fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 main_loop("f6d5",fen_string,1)
 
-#fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 
 

@@ -114,6 +114,8 @@ class App:
         diffs[~m] = 0 
         diffs[m] = 255
 
+        plt.imshow(diffs)
+        plt.show()
         squares = Board.splitquare(diffs)
         self.last_move = image 
         
@@ -121,7 +123,7 @@ class App:
         a = means.argsort()
 
         legal_move = getLegalMove(self.Board, a )
-        #self.display_move(legal_move)
+        self.display_move(legal_move)
 
         print(chess.Move.from_uci(legal_move))
     def showFrame(self): 

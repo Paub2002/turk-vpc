@@ -117,8 +117,8 @@ class App:
             diffs[~m] = 0 
             diffs[m] = 255
 
-            plt.imshow(diffs)
-            plt.show()
+            # plt.imshow(diffs)
+            # plt.show()
             squares = Board.splitquare(diffs)
             self.last_move = image 
             

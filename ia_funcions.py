@@ -112,7 +112,7 @@ def main_loop(board,move):
         if bad_move:
             player_move_alg = alg_to_alg(move, board)
             best_move_alg = alg_to_alg(best_move, board)
-            text = request.chess_question(fen_string, player_move_alg, best_move_alg)
+            text = request.chess_question(board.fen(), player_move_alg, best_move_alg)
             speech.text_to_speech(text)
             print("Bad Move ma boy")
         else:
@@ -148,7 +148,7 @@ def Player_moves(board,move):
     if points >= GRAVE_ERROR:
             player_move_alg = alg_to_alg(move, board)
             best_move_alg = alg_to_alg(best_move, board)
-            text = request.chess_question(fen_string, player_move_alg, best_move_alg)
+            text = request.chess_question(board.fen(), player_move_alg, best_move_alg)
             speech.text_to_speech(text)
     else : 
         print ("Good Move")

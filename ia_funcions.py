@@ -7,7 +7,8 @@ LEVE_ERROR = 20
 ERROR = 50
 GRAVE_ERROR = 150
 
-stockfish = Stockfish(path="stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+
 
 
 def get_succession_of_best_moves(fen, depth):
@@ -151,10 +152,11 @@ def Player_moves(board,move):
             speech.text_to_speech(text)
     else : 
         print ("Good Move")
+    return stockfish.get_best_move()
 
 #fen_string = "r1bqkb1r/pp1ppppp/2n2n2/2p5/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"
-fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-main_loop("f6d5",fen_string,1)
+# fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+# main_loop("f6d5",fen_string,1)
 
 
 

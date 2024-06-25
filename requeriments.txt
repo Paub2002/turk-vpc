@@ -1,3 +1,7 @@
 opencv-python
 python-chess
 tk
+stockfish
+google.generativeai
+pydub
+google.cloud.texttospeech

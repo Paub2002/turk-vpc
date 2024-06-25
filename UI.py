@@ -6,6 +6,7 @@ import cv2
 import Board
 import chess
 import chess.svg
+import ia_funcions
 
 # Para debug
 from cairosvg import svg2png
@@ -73,14 +74,15 @@ class App:
         self.moveButton.grid(row= 10)
 
         # Inicializaoms los puntos a seleccionar
-        point0 = point(self.points_frame,-1,-1,"TL",0)
-        point1 = point(self.points_frame,-1,-1,"TR",1)
-        point2 = point(self.points_frame,-1,-1,"BL",2)
-        point3 = point(self.points_frame,-1,-1,"BR",3)
+        point0 = point(self.points_frame,-1,-1,"H8",0)
+        point1 = point(self.points_frame,-1,-1,"A8",1)
+        point2 = point(self.points_frame,-1,-1,"H1",2)
+        point3 = point(self.points_frame,-1,-1,"A1",3)
 
         self.selected_points = [point0,point1,point2,point3]
         self.TMat = None
         self.coords = None
+        self.turn = 0
         self.dstPoints = np.array([[0,512],[512,512],[0,0],[512,0]])
         self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,512]),np.array([512,0]),np.array([512,512]))
         self.mask = getMask(512)
@@ -107,26 +109,36 @@ class App:
         self.transform_frame.configure(image=self.Board_image)
 
     def getMove(self): 
-        im =self.cvDest 
-        image = proecssImage(im)        
-        diffs = image - self.last_move
-        m = np.logical_and( diffs > 10,diffs < 240) 
-        diffs[~m] = 0 
-        diffs[m] = 255
+        if self.turn % 2 == 0: 
+            im =self.cvDest 
+            image = proecssImage(im)        
+            diffs = image - self.last_move
+            m = np.logical_and( diffs > 10,diffs < 240) 
+            diffs[~m] = 0 
+            diffs[m] = 255
 
-        plt.imshow(diffs)
-        plt.show()
-        squares = Board.splitquare(diffs)
-        self.last_move = image 
-        
-        means = np.mean(squares,axis=(1,2))
-        a = means.argsort()
+            plt.imshow(diffs)
+            plt.show()
+            squares = Board.splitquare(diffs)
+            self.last_move = image 
+            
+            means = np.mean(squares,axis=(1,2))
+            a = means.argsort()
 
-        legal_move = getLegalMove(self.Board, a )
-        #self.display_move(legal_move)
+            legal_move = getLegalMove(self.Board, a )
+            #self.display_move(legal_move)
 
-        self.Board.push(chess.Move.from_uci(legal_move))
-        print(chess.Move.from_uci(legal_move))
+            turk_move = ia_funcions.Player_moves(self.Board,legal_move)
+            print(turk_move)
+            self.Board.push(chess.Move.from_uci(legal_move))
+            self.Board.push(chess.Move.from_uci(turk_move))
+            print(chess.Move.from_uci(legal_move))
+        else: 
+            im =self.cvDest 
+            image = proecssImage(im)        
+            self.last_move = image 
+        self.turn+=1
+
     def showFrame(self): 
          
         self.cvImage = capture_frame(self.captura)

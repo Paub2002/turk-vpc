@@ -23,7 +23,7 @@ class App:
         
         self.root = Tk()
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
-        self.captura = cv2.VideoCapture(0)
+        self.captura = cv2.VideoCapture(1)
 
 
         # Placeholder per la homografia 
@@ -72,6 +72,7 @@ class App:
         plt.imshow(diffs,'gray')
         plt.show()
     def showFrame(self): 
+         
         self.cvImage = capture_frame(self.captura)
 
         image = Image.fromarray(self.cvImage)

@@ -40,6 +40,7 @@ def getLegalMove(board,sorted_squares):
     squares_to_check = []
     for i in indices_to_check: 
         squares_to_check.append(board_indices[i])
+        print(board_indices[i])
     possible_moves = []
     for i in range(max_back):
         for j in range ( i+1 , max_back):
@@ -56,7 +57,7 @@ class App:
         
         self.root = Tk()
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
-        self.captura = cv2.VideoCapture(0)
+        self.captura = cv2.VideoCapture(1)
 
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
@@ -114,8 +115,8 @@ class App:
         diffs[~m] = 0 
         diffs[m] = 255
 
-        plt.imshow(diffs)
-        plt.show()
+        # plt.imshow(diffs)
+        # plt.show()
         squares = Board.splitquare(diffs)
         self.last_move = image 
         

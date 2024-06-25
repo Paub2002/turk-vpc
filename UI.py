@@ -30,7 +30,7 @@ def getMask(size):
     return blank
 def proecssImage(image): 
     im = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
-    Blured  = cv2.GaussianBlur(im,(11,11),0)
+    Blured  = cv2.GaussianBlur(im,(21,21),0)
     return Blured
 
 def getLegalMove(board,sorted_squares): 
@@ -58,7 +58,6 @@ class App:
         self.root = Tk()
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(1)
-
         # Initializamos objetos tk
         self.video_frame =      Label(self.root)                             # Frame for video input
         self.transform_frame =  Label(self.root)      # Frame for transformed input 
@@ -129,6 +128,7 @@ class App:
         self.Board.push(chess.Move.from_uci(legal_move))
         print(chess.Move.from_uci(legal_move))
     def showFrame(self): 
+         
         self.cvImage = capture_frame(self.captura)
 
         image = Image.fromarray(self.cvImage)

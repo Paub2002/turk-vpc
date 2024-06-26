@@ -2,14 +2,36 @@ from stockfish import Stockfish
 import chess
 import request
 import speech
+import serial_com_python
 
 LEVE_ERROR = 20
 ERROR = 50
 GRAVE_ERROR = 150
 
-stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+#stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+stockfish = Stockfish(path="stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
 
+board_indices = [
+"h1","g1","f1","e1","d1","c1","b1","a1",
+"h2","g2","f2","e2","d2","c2","b2","a2",
+"h3","g3","f3","e3","d3","c3","b3","a3",
+"h4","g4","f4","e4","d4","c4","b4","a4",
+"h5","g5","f5","e5","d5","c5","b5","a5",
+"h6","g6","f6","e6","d6","c6","b6","a6",
+"h7","g7","f7","e7","d7","c7","b7","a7",
+"h8","g8","f8","e8","d8","c8","b8","a8"
+]
 
+robot_indices = [
+"00","01","02","03","04","05","06","07",
+"10","11","12","13","14","15","16","17",
+"20","21","22","23","24","25","26","27",
+"30","31","32","33","34","35","36","37",
+"40","41","42","43","44","45","46","47",
+"50","51","52","53","54","55","56","57",
+"60","61","62","63","64","65","66","67",
+"70","71","72","73","74","75","76","77"    
+]
 
 def get_succession_of_best_moves(fen, depth):
     fen_succession = ""
@@ -71,6 +93,42 @@ def es_negra(tablero, posicion):
     pieza = tablero.piece_at(cuadrado)
     # Verificar si la pieza es negra
     return pieza is not None and pieza.color == chess.BLACK
+
+def getHintMove(fen_string):
+    stockfish.set_fen_position(fen_string)
+    posicion = stockfish.get_best_move()
+    posicion = posicion[:2]
+    text = "Si mueves la pieza en la posición " + posicion + " podrás hacer un muy buen movimiento, maestro"
+    speech.text_to_speech(text)
+
+    coords = [posicion,posicion]
+    robotCoords = toRobotIndices(coords)
+    print(str(robotCoords))
+    serial_com_python.movement(str(robotCoords))
+    return posicion
+
+def toRobotIndices(coords):
+    for x in range(len(board_indices)):
+        if board_indices[x] == coords[0]:
+            break
+    if len(coords) > 1:
+        for y in range(len(board_indices)):
+            if board_indices[y] == coords[1]:
+                break
+    result = str(x)+str(y)
+    return result
+
+def separateMove(ax):    
+    coords = [ax[:2],ax[-2:]]
+    return coords
+
+def ilegalMove(move):    
+    posicion = separateMove(move)
+    robotCoords = toRobotIndices(posicion)
+    print(str(robotCoords))
+    serial_com_python.movement(str(robotCoords))
+    text = "Si mueves la pieza en la posición " + posicion[0] + " a la posición " + posicion[1] + " sería un movimiento ilegal, mameluco"
+    speech.text_to_speech(text)
 
 
 
@@ -152,12 +210,14 @@ def Player_moves(board,move):
             speech.text_to_speech(text)
     else : 
         print ("Good Move")
-    return stockfish.get_best_move()
+    turk_move = stockfish.get_best_move()
+    robot_move = separateMove(turk_move)
+    robotCoords = toRobotIndices(robot_move)
+    serial_com_python.movement(str(robotCoords))
 
-#fen_string = "r1bqkb1r/pp1ppppp/2n2n2/2p5/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"
-# fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-# main_loop("f6d5",fen_string,1)
+    return turk_move
 
+ilegalMove("b2b4")
 
 
 

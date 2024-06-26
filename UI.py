@@ -9,7 +9,6 @@ import chess.svg
 import ia_funcions
 
 # Para debug
-from cairosvg import svg2png
 from matplotlib import pyplot as plt
 board_indices = [
 "h1","g1","f1","e1","d1","c1","b1","a1",
@@ -35,7 +34,7 @@ def proecssImage(image):
     return Blured
 
 def getLegalMove(board,sorted_squares): 
-    max_back = 5
+    max_back = 3
     sorted_squares = sorted_squares[::-1]
     indices_to_check = sorted_squares[:max_back]
     squares_to_check = []
@@ -49,7 +48,11 @@ def getLegalMove(board,sorted_squares):
             possible_moves.append( squares_to_check[j] + squares_to_check[i] )
     for move in possible_moves: 
         if chess.Move.from_uci(move) in board.legal_moves: 
-            return move 
+            return move
+        
+    ia_funcions.ilegalMove(move)
+    return ""
+
 
 
 
@@ -60,18 +63,21 @@ class App:
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(1)
         # Initializamos objetos tk
+        self.placeholder = ImageTk.PhotoImage(Image.open("check.jpg"))
         self.video_frame =      Label(self.root)                             # Frame for video input
-        self.transform_frame =  Label(self.root)      # Frame for transformed input 
+        self.transform_frame =  Label(self.root,image=self.placeholder)      # Frame for transformed input 
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
         self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
         self.moveButton = Button(self.points_frame,text="MOVE",command=self.getMove)   # Button for starting transformation
+        self.hintButton = Button(self.points_frame,text="HINT",command=self.getHint)   # Button for starting transformation
 
         # Mostramos Objetos TK 
         self.video_frame.grid(row=0,column=0,sticky=E)
         self.points_frame.grid(row=0,column=1,sticky=NW,rowspan=3)
         self.transform_frame.grid(row=0,column=2,sticky=W) 
         self.moveButton.grid(row= 10)
+        self.hintButton.grid(row=15)
 
         # Inicializaoms los puntos a seleccionar
         point0 = point(self.points_frame,-1,-1,"H8",0)
@@ -93,20 +99,7 @@ class App:
         self.video_frame.after(10,self.showFrame)
 
         self.Board = chess.Board()
-        self.display_move()
         self.transform = False
-    def display_move(self, move = ""):
-        if move != "":
-            self.Board.push_uci(move)    
-        else:
-            move = "initial_position"
-        
-        self.boardsvg = chess.svg.board(self.Board, size=500)
-        png = svg2png(bytestring=self.boardsvg,write_to= move + ".png")
-        im = Image.open(move + ".png")
-        self.Board_image = ImageTk.PhotoImage(image=im)
-        self.transform = False
-        self.transform_frame.configure(image=self.Board_image)
 
     def getMove(self): 
         if self.turn % 2 == 0: 
@@ -130,14 +123,20 @@ class App:
 
             turk_move = ia_funcions.Player_moves(self.Board,legal_move)
             print(turk_move)
-            self.Board.push(chess.Move.from_uci(legal_move))
-            self.Board.push(chess.Move.from_uci(turk_move))
-            print(chess.Move.from_uci(legal_move))
+            if legal_move != "":
+                self.Board.push(chess.Move.from_uci(legal_move))
+                self.Board.push(chess.Move.from_uci(turk_move))
+                print(chess.Move.from_uci(legal_move))
         else: 
             im =self.cvDest 
             image = proecssImage(im)        
             self.last_move = image 
         self.turn+=1
+
+    def getHint(self):
+        best_move = ia_funcions.getHintMove(self.Board.fen())
+        print(best_move)
+        #hint_move = ia_funcions.stockfish.get_best_move()
 
     def showFrame(self): 
          

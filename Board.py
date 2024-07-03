@@ -425,7 +425,7 @@ def GeneratePoints(im):
    # Categorize segments
    categoriesx = categorizeSegments(segx)
    categoriesy = categorizeSegments(segy)
-   
+    
    # Group point categories
    groupedPointsx = groupCategories(categoriesx, pointsx)
    groupedPointsy = groupCategories(categoriesy, pointsy)
@@ -441,3 +441,66 @@ def GeneratePoints(im):
    pointmask = ~pointmask
    points = points[pointmask]
    return points
+def main():
+    captura = cv.VideoCapture(1)
+    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+
+    plt.imshow(frame)
+    plt.show()
+    # showHist(frame)
+    mask = cv.inRange(frame,np.array([150, 40, 40]),np.array([255, 120,120]))
+    plt.imshow(mask)
+    plt.show()
+    contours,_= cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+    areas = []
+    for c in contours : areas.append(cv.contourArea(c))
+    bigest = np.argsort(areas)[::-1]
+
+    c1 = contours[bigest[0]]
+    M1 = cv.moments(c1)
+    center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
+
+    c2 = contours[bigest[1]]
+    M2 = cv.moments(c2)
+    center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+
+    cv.circle(frame, center1, 2, (0,0,255), -1)
+    cv.circle(frame, center2, 2, (0,0,255), -1)
+    plt.imshow(frame)
+    plt.show()
+
+    kernel = np.ones((3,3),np.uint8)
+    # mask = cv.inRange(frame,np.array([60, 120, 100]),np.array([110, 160, 190]))
+    output = cv.bitwise_and(frame, frame, mask = mask)
+    fig,ax = plt.subplots(2)
+    ax[0].imshow(output)
+    morphed = cv.erode(output,kernel)
+    
+    ax[1].imshow(morphed)
+    plt.show()
+
+def showHist(image):
+    # Extract 2-D arrays of the RGB channels: red, green, blue
+    red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]
+
+    # Flatten the 2-D arrays of the RGB channels into 1-D
+    red_pixels = red.flatten()
+    green_pixels = green.flatten()
+    blue_pixels = blue.flatten()
+    plt.figure(figsize=(9,9))
+    plt.hist(red_pixels, bins=256, density=False, color='red', alpha=0.5)
+    plt.hist(green_pixels, bins=256, density=False, color='green', alpha=0.4)
+    plt.hist(blue_pixels, bins=256, density=False, color='blue', alpha=0.3)
+
+    # set labels and ticks
+
+    # Cosmetics
+    plt.title('Histograms from color image')
+    plt.ylabel('Counts')
+    plt.xlabel('Intensity')
+
+    # Display the plot
+    plt.show()
+if __name__ == "__main__":
+    main()

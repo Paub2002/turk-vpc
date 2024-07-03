@@ -442,13 +442,69 @@ def GeneratePoints(im):
    points = points[pointmask]
    return points
 def main():
-    captura = cv.VideoCapture(1)
-    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
 
+    #Frame Reading
+
+    # captura = cv.VideoCapture(1)
+    # frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    # plt.imshow(frame)
+    # plt.show()
+    # showHist(frame)
+
+
+    # we define the colors 
+    red_low  = np.array([ 150,  90,  90 ])
+    red_upp  = np.array([ 255, 150, 150 ])
+    blue_low = np.array([ 80, 200, 200 ])
+    blue_upp = np.array([ 150, 255, 255 ])
+
+    # Search for biggest blobs 
+    hX, hY = find2ColorPoints(frame,red_low,red_upp)
+    aX, aY = find2ColorPoints(frame,blue_low,blue_upp)
+
+    #Center calculation 
+    centh = hY +     (hX - hY)       / 2 
+    centa = aY +     (aX - aY)       / 2 
+
+    cent  = centh +  (centa - centh) / 2 
+    cent = cent.astype(np.uint32)
+
+    #Rotation Correction 
+    supposedDiff = True
+    Ydiff = np.abs(aY - aX)
+    if Ydiff[0] < Ydiff[1] :
+        supposedDiff = False 
+    Xdiff = np.abs(hX - aX) 
+    if Xdiff[0 if supposedDiff else  1   ] > Xdiff[ 1 if supposedDiff else 0]:
+        tmp = aY
+        aY = aX
+        aX = tmp
+
+    #Homography
+    coords = np.array([hX,aX,hY,aY])
+    dst = np.array([[0,512],[512,512],[0,0],[512,0]])
+
+    M,_ = cv.findHomography(coords,dst)
+    dst = cv.warpPerspective(frame, M, (512,512))
+
+    #DEBUG Display
+    cv.circle(frame,hX,2,(0,0,255),-1)
+    cv.circle(frame,hY,2,(0,0,255),-1)
+    cv.circle(frame,aX,2,(0,0,255),-1)
+    cv.circle(frame,aY,2,(0,0,255),-1)
+    cv.circle(frame,cent,10, (0,100,255),-1)
+    cv.circle(frame,centh.astype(np.uint32),10,(0,100,255),-1)
+    cv.circle(frame,centa.astype(np.uint32),10,(0,100,255),-1)
+   
     plt.imshow(frame)
     plt.show()
-    # showHist(frame)
-    mask = cv.inRange(frame,np.array([150, 40, 40]),np.array([255, 120,120]))
+    plt.imshow(dst)
+    plt.show()
+
+def find2ColorPoints(frame,low,up): 
+
+    mask = cv.inRange(frame,low,up)
     plt.imshow(mask)
     plt.show()
     contours,_= cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
@@ -457,29 +513,19 @@ def main():
     for c in contours : areas.append(cv.contourArea(c))
     bigest = np.argsort(areas)[::-1]
 
-    c1 = contours[bigest[0]]
-    M1 = cv.moments(c1)
-    center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
+    try :
+        c1 = contours[bigest[0]]
+        M1 = cv.moments(c1)
+        center1 = np.array([int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"])])
 
-    c2 = contours[bigest[1]]
-    M2 = cv.moments(c2)
-    center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+        c2 = contours[bigest[1]]
+        M2 = cv.moments(c2)
+        center2 = np.array([int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"])])
 
-    cv.circle(frame, center1, 2, (0,0,255), -1)
-    cv.circle(frame, center2, 2, (0,0,255), -1)
-    plt.imshow(frame)
-    plt.show()
-
-    kernel = np.ones((3,3),np.uint8)
-    # mask = cv.inRange(frame,np.array([60, 120, 100]),np.array([110, 160, 190]))
-    output = cv.bitwise_and(frame, frame, mask = mask)
-    fig,ax = plt.subplots(2)
-    ax[0].imshow(output)
-    morphed = cv.erode(output,kernel)
+        return center1,center2
+    except (ZeroDivisionError): 
+        return []
     
-    ax[1].imshow(morphed)
-    plt.show()
-
 def showHist(image):
     # Extract 2-D arrays of the RGB channels: red, green, blue
     red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]

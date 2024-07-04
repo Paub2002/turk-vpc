@@ -2,7 +2,7 @@ from stockfish import Stockfish
 import chess
 import request
 import speech
-import serial_com_python
+#import serial_com_python
 
 LEVE_ERROR = 20
 ERROR = 50
@@ -103,8 +103,8 @@ def getHintMove(fen_string):
 
     coords = [posicion,posicion]
     robotCoords = toRobotIndices(coords)
-    print(str(robotCoords))
-    serial_com_python.movement(str(robotCoords))
+    print("DANI: ", str(robotCoords))
+    #serial_com_python.movement(str(robotCoords))
     return posicion
 
 def toRobotIndices(coords):
@@ -125,8 +125,8 @@ def separateMove(ax):
 def ilegalMove(move):    
     posicion = separateMove(move)
     robotCoords = toRobotIndices(posicion)
-    print(str(robotCoords))
-    serial_com_python.movement(str(robotCoords))
+    print("DANI: ", str(robotCoords))
+    #serial_com_python.movement(str(robotCoords))
     text = "Si mueves la pieza en la posición " + posicion[0] + " a la posición " + posicion[1] + " sería un movimiento ilegal, mameluco"
     speech.text_to_speech(text)
 
@@ -213,12 +213,10 @@ def Player_moves(board,move):
     turk_move = stockfish.get_best_move()
     robot_move = separateMove(turk_move)
     robotCoords = toRobotIndices(robot_move)
-    serial_com_python.movement(str(robotCoords))
+    print("DANI: ", robotCoords)
+    #serial_com_python.movement(str(robotCoords))
 
     return turk_move
-
-ilegalMove("b2b4")
-
 
 
 

@@ -2,7 +2,7 @@ from stockfish import Stockfish
 import chess
 import request
 import speech
-#import serial_com_python
+import serial_com_python
 
 LEVE_ERROR = 20
 ERROR = 50
@@ -220,6 +220,7 @@ def Player_moves(board,move):
 
 
 
-
-    
-
+scara = serial_com_python.SerialCom()
+scara.startSerial()
+scara.writeSerial("7007")
+scara.endSerial()

@@ -1,30 +1,20 @@
-# si no chuta, pot caler instalar:
-# pip install pyserial
+# si no chuta, pot caldre instalar:
+#   > pip install pyserial
 
 import serial
 import serial.tools.list_ports
 
-s = serial.Serial()
-s.baundrate = 96000
+class SerialCom:
+    def __init__(self):
+        self._s = serial.Serial()
 
-# choose port
-ports = serial.tools.list_ports.comports()
+    def startSerial(self):
+        self._s.baudrate = 9600
+        self._s.port = "COM3"
+        self._s.open()
 
-if ports:
-    print("Ports serial disponibles:")
-    for port in ports:
-        print(f"- {port.device}: {port.description}")
-else:
-    print("No s'han trobat ports serial disponibles.")
+    def writeSerial(self, command):
+        self._s.write(command.encode('utf-8'))
 
-s.port = input("Port: ")
-
-# start communication
-s.open()
-
-while True:
-    command = input()
-    s.write(command.encode('utf-8'))
-    if command == 'exit':
-        s.close() # so important.
-        exit()
+    def endSerial(self):
+        self._s.close()

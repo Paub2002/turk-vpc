@@ -425,7 +425,7 @@ def GeneratePoints(im):
    # Categorize segments
    categoriesx = categorizeSegments(segx)
    categoriesy = categorizeSegments(segy)
-   
+    
    # Group point categories
    groupedPointsx = groupCategories(categoriesx, pointsx)
    groupedPointsy = groupCategories(categoriesy, pointsy)
@@ -441,3 +441,158 @@ def GeneratePoints(im):
    pointmask = ~pointmask
    points = points[pointmask]
    return points
+def AutoGetHomography(): 
+    captura = cv.VideoCapture(1)
+    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    # plt.imshow(frame)
+    # plt.show()
+    # showHist(frame)
+
+
+    # we define the colors 
+    red_low  = np.array([ 150,  90,  90 ])
+    red_upp  = np.array([ 255, 150, 150 ])
+    blue_low = np.array([ 80, 200, 200 ])
+    blue_upp = np.array([ 150, 255, 255 ])
+
+    # Search for biggest blobs 
+    hX, hY = find2ColorPoints(frame,red_low,red_upp)
+    aX, aY = find2ColorPoints(frame,blue_low,blue_upp)
+
+    #Center calculation 
+    centh = hY +     (hX - hY)       / 2 
+    centa = aY +     (aX - aY)       / 2 
+
+    cent  = centh +  (centa - centh) / 2 
+    cent = cent.astype(np.uint32)
+
+    #Rotation Correction 
+    supposedDiff = True
+    Ydiff = np.abs(aY - aX)
+    if Ydiff[0] < Ydiff[1] :
+        supposedDiff = False 
+    Xdiff = np.abs(hX - aX) 
+    if Xdiff[0 if supposedDiff else  1   ] > Xdiff[ 1 if supposedDiff else 0]:
+        tmp = aY
+        aY = aX
+        aX = tmp
+
+    #Homography
+    coords = np.array([hX,aX,hY,aY])
+    dst = np.array([[0,512],[512,512],[0,0],[512,0]])
+
+    M,_ = cv.findHomography(coords,dst)
+    dst = cv.warpPerspective(frame, M, (512,512))
+    return M
+
+
+def main():
+
+    #Frame Reading
+
+    # captura = cv.VideoCapture(1)
+    # frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    # plt.imshow(frame)
+    # plt.show()
+    # showHist(frame)
+
+
+    # we define the colors 
+    red_low  = np.array([ 150,  90,  90 ])
+    red_upp  = np.array([ 255, 150, 150 ])
+    blue_low = np.array([ 80, 200, 200 ])
+    blue_upp = np.array([ 150, 255, 255 ])
+
+    # Search for biggest blobs 
+    hX, hY = find2ColorPoints(frame,red_low,red_upp)
+    aX, aY = find2ColorPoints(frame,blue_low,blue_upp)
+
+    #Center calculation 
+    centh = hY +     (hX - hY)       / 2 
+    centa = aY +     (aX - aY)       / 2 
+
+    cent  = centh +  (centa - centh) / 2 
+    cent = cent.astype(np.uint32)
+
+    #Rotation Correction 
+    supposedDiff = True
+    Ydiff = np.abs(aY - aX)
+    if Ydiff[0] < Ydiff[1] :
+        supposedDiff = False 
+    Xdiff = np.abs(hX - aX) 
+    if Xdiff[0 if supposedDiff else  1   ] > Xdiff[ 1 if supposedDiff else 0]:
+        tmp = aY
+        aY = aX
+        aX = tmp
+
+    #Homography
+    coords = np.array([hX,aX,hY,aY])
+    dst = np.array([[0,512],[512,512],[0,0],[512,0]])
+
+    M,_ = cv.findHomography(coords,dst)
+    dst = cv.warpPerspective(frame, M, (512,512))
+
+    #DEBUG Display
+    cv.circle(frame,hX,2,(0,0,255),-1)
+    cv.circle(frame,hY,2,(0,0,255),-1)
+    cv.circle(frame,aX,2,(0,0,255),-1)
+    cv.circle(frame,aY,2,(0,0,255),-1)
+    cv.circle(frame,cent,10, (0,100,255),-1)
+    cv.circle(frame,centh.astype(np.uint32),10,(0,100,255),-1)
+    cv.circle(frame,centa.astype(np.uint32),10,(0,100,255),-1)
+   
+    plt.imshow(frame)
+    plt.show()
+    plt.imshow(dst)
+    plt.show()
+
+def find2ColorPoints(frame,low,up): 
+
+    mask = cv.inRange(frame,low,up)
+    plt.imshow(mask)
+    plt.show()
+    contours,_= cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+    areas = []
+    for c in contours : areas.append(cv.contourArea(c))
+    bigest = np.argsort(areas)[::-1]
+
+    try :
+        c1 = contours[bigest[0]]
+        M1 = cv.moments(c1)
+        center1 = np.array([int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"])])
+
+        c2 = contours[bigest[1]]
+        M2 = cv.moments(c2)
+        center2 = np.array([int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"])])
+
+        return center1,center2
+    except (ZeroDivisionError): 
+        return []
+    
+def showHist(image):
+    # Extract 2-D arrays of the RGB channels: red, green, blue
+    red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]
+
+    # Flatten the 2-D arrays of the RGB channels into 1-D
+    red_pixels = red.flatten()
+    green_pixels = green.flatten()
+    blue_pixels = blue.flatten()
+    plt.figure(figsize=(9,9))
+    plt.hist(red_pixels, bins=256, density=False, color='red', alpha=0.5)
+    plt.hist(green_pixels, bins=256, density=False, color='green', alpha=0.4)
+    plt.hist(blue_pixels, bins=256, density=False, color='blue', alpha=0.3)
+
+    # set labels and ticks
+
+    # Cosmetics
+    plt.title('Histograms from color image')
+    plt.ylabel('Counts')
+    plt.xlabel('Intensity')
+
+    # Display the plot
+    plt.show()
+if __name__ == "__main__":
+    main()

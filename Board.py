@@ -441,6 +441,52 @@ def GeneratePoints(im):
    pointmask = ~pointmask
    points = points[pointmask]
    return points
+def AutoGetHomography(): 
+    captura = cv.VideoCapture(1)
+    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    # plt.imshow(frame)
+    # plt.show()
+    # showHist(frame)
+
+
+    # we define the colors 
+    red_low  = np.array([ 150,  90,  90 ])
+    red_upp  = np.array([ 255, 150, 150 ])
+    blue_low = np.array([ 80, 200, 200 ])
+    blue_upp = np.array([ 150, 255, 255 ])
+
+    # Search for biggest blobs 
+    hX, hY = find2ColorPoints(frame,red_low,red_upp)
+    aX, aY = find2ColorPoints(frame,blue_low,blue_upp)
+
+    #Center calculation 
+    centh = hY +     (hX - hY)       / 2 
+    centa = aY +     (aX - aY)       / 2 
+
+    cent  = centh +  (centa - centh) / 2 
+    cent = cent.astype(np.uint32)
+
+    #Rotation Correction 
+    supposedDiff = True
+    Ydiff = np.abs(aY - aX)
+    if Ydiff[0] < Ydiff[1] :
+        supposedDiff = False 
+    Xdiff = np.abs(hX - aX) 
+    if Xdiff[0 if supposedDiff else  1   ] > Xdiff[ 1 if supposedDiff else 0]:
+        tmp = aY
+        aY = aX
+        aX = tmp
+
+    #Homography
+    coords = np.array([hX,aX,hY,aY])
+    dst = np.array([[0,512],[512,512],[0,0],[512,0]])
+
+    M,_ = cv.findHomography(coords,dst)
+    dst = cv.warpPerspective(frame, M, (512,512))
+    return M
+
+
 def main():
 
     #Frame Reading

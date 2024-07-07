@@ -8,6 +8,18 @@ import chess
 import chess.svg
 import ia_funcions
 
+##################################
+# TODO 
+# - Remove buttons 
+# - Add file listener
+# - button action into file 
+# - undo functionality 
+# - hint functionality ( conexion ) 
+# - Detecció de colors. 
+##################################
+
+
+
 # Para debug
 from matplotlib import pyplot as plt
 board_indices = [

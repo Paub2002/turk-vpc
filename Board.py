@@ -487,8 +487,19 @@ def AutoGetHomography(captura):
     M,_ = cv.findHomography(coords,dst)
     dst = cv.warpPerspective(frame, M, (512,512))
 
+    splits = splitquare(dst)
+    if not correctSide (splits[31],splits[39]):
+        ta = aX
+        th = hX
+        aX = aY
+        hX = hY
+        aY = ta       
+        hY = th
+        coords = np.array([hX,aX,hY,aY])
+        M,_ = cv.findHomography(coords,dst)
     return M
-
+def correctSide(wSplit, bSplit): 
+    return wSplit.mean() < bSplit.mean()
 
 def main():
 

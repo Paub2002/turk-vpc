@@ -6,40 +6,45 @@ import cv2
 import Board
 import chess
 import chess.svg
-import ia_funcions
+# import ia_funcions
 
-##################################
-# TODO 
+###########TODO####################
+#
 # - Remove buttons 
 # - Add file listener
 # - button action into file 
 # - undo functionality 
 # - hint functionality ( conexion ) 
 # - Detecció de colors. 
+#
 ##################################
-
 
 
 # Para debug
 from matplotlib import pyplot as plt
 board_indices = [
-"h1","g1","f1","e1","d1","c1","b1","a1",
-"h2","g2","f2","e2","d2","c2","b2","a2",
-"h3","g3","f3","e3","d3","c3","b3","a3",
-"h4","g4","f4","e4","d4","c4","b4","a4",
-"h5","g5","f5","e5","d5","c5","b5","a5",
-"h6","g6","f6","e6","d6","c6","b6","a6",
-"h7","g7","f7","e7","d7","c7","b7","a7",
-"h8","g8","f8","e8","d8","c8","b8","a8"
+
+    "h1","g1","f1","e1","d1","c1","b1","a1",
+    "h2","g2","f2","e2","d2","c2","b2","a2",
+    "h3","g3","f3","e3","d3","c3","b3","a3",
+    "h4","g4","f4","e4","d4","c4","b4","a4",
+    "h5","g5","f5","e5","d5","c5","b5","a5",
+    "h6","g6","f6","e6","d6","c6","b6","a6",
+    "h7","g7","f7","e7","d7","c7","b7","a7",
+    "h8","g8","f8","e8","d8","c8","b8","a8"
+
 ]
+
 def capture_frame(capture):
     return cv2.cvtColor(capture.read()[1],cv2.COLOR_BGR2RGB)
+
 def getMask(size): 
     blank = np.zeros((size,size),dtype=bool)
     for i in range(0,size,size//8): 
         blank[i,:] = True
         blank[:,i] = True
     return blank
+
 def proecssImage(image): 
     im = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
     Blured  = cv2.GaussianBlur(im,(21,21),0)
@@ -65,9 +70,7 @@ def getLegalMove(board,sorted_squares):
     ia_funcions.ilegalMove(move)
     return ""
 
-
-
-
+# App Class 
 class App: 
     def __init__(self): 
         
@@ -75,14 +78,14 @@ class App:
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(1)
         # Initializamos objetos tk
-        self.placeholder = ImageTk.PhotoImage(Image.open("check.jpg"))
+        self.placeholder =      ImageTk.PhotoImage(Image.open("check.jpg"))
         self.video_frame =      Label(self.root)                             # Frame for video input
         self.transform_frame =  Label(self.root,image=self.placeholder)      # Frame for transformed input 
 
         self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
-        self.go_button = Button(self.points_frame,text="CONTINUA",command=self.nextStage)   # Button for starting transformation
-        self.moveButton = Button(self.points_frame,text="MOVE",command=self.getMove)   # Button for starting transformation
-        self.hintButton = Button(self.points_frame,text="HINT",command=self.getHint)   # Button for starting transformation
+        self.go_button =  Button(self.points_frame, text="CONTINUA",command=self.nextStage) # Button for starting transformation
+        self.moveButton = Button(self.points_frame, text="MOVE",    command=self.getMove)   # Button for starting transformation
+        self.hintButton = Button(self.points_frame, text="HINT",    command=self.getHint)   # Button for starting transformation
 
         # Mostramos Objetos TK 
         self.video_frame.grid(row=0,column=0,sticky=E)
@@ -151,7 +154,6 @@ class App:
         #hint_move = ia_funcions.stockfish.get_best_move()
 
     def showFrame(self): 
-         
         self.cvImage = capture_frame(self.captura)
 
         image = Image.fromarray(self.cvImage)
@@ -163,8 +165,6 @@ class App:
 
     # Calcula la transformada del frame i lo muestra en el recuadro adecuado
     def showTransform(self): 
-
-
         wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
         self.cvDest = wraped
         dst = wraped.copy()
@@ -176,7 +176,7 @@ class App:
         if self.transform == True : self.transform_frame.after(30,self.showTransform)
 
     # Completa la calibracion y muestra la transformacion 
-    def nextStage(self):
+    def oldnextStage(self):
         coords = []
         for point in self.selected_points:
             coords.append( [ point.getCoord() ] )
@@ -189,6 +189,15 @@ class App:
         self.cvDest = dst
         self.last_move =proecssImage(dst)
         self.transform = True
+    def nextStage(self):
+        M =  Board.AutoGetHomography(self.captura)
+        self.TMat = M
+        self.video_frame.after(10,self.showTransform)
+        dst = cv2.warpPerspective(self.cvImage, M, (512,512))
+        self.cvDest = dst
+        self.last_move =proecssImage(dst)
+        self.transform = True
+
     # Añade las coordenadas a un punto nuevo 
     def addPoint(self,event): 
         for p in self.selected_points:
@@ -200,16 +209,14 @@ class App:
                 return
         # Si todos los puntos estan seleccionados muestra el boton para terminar la calibracion 
         self.spawnButton()
+
     # Muestra el boton 
     def spawnButton(self):
         self.go_button.grid(sticky=S + W + E)
 
-         
-
+#Point Class 
 class point: 
     def __init__(self,parent,x,y,cornerTag,row): 
-
-
         self.y = y
         self.selected = False 
         self.corner_tag = cornerTag

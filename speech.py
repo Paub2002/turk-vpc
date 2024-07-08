@@ -4,8 +4,8 @@ from pydub import AudioSegment
 from pydub.playback import play
 from google.cloud import texttospeech
 
-#os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "turk-vpc/text-to-speech.json"
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "text-to-speech.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "turk-vpc/text-to-speech.json"
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "text-to-speech.json"
 
 client = texttospeech.TextToSpeechClient()
 

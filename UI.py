@@ -130,18 +130,28 @@ class App:
     def checkServer(self): 
         dir = os.listdir()
         if 'move_req.txt' in dir: 
-            self.move() 
+            move = self.move() 
             os.remove('move_req.txt')
+            f = open('move_res.txt','w')
+            f.write(move)
+            f.close()
 
         if 'hint_req.txt' in dir: 
-            self.hint() 
+            move =  self.hint() 
             os.remove('hint_req.txt')
+            f = open('hint_res.txt','w')
+            f.write(move)
+            f.close()
         if 'undo_req.txt' in dir: 
             self.undo() 
             os.remove('undo_req.txt')
+            f = open('undo_res.txt','w')
+            f.write('m')
+            f.close()
 
         self.root.after(20,self.checkServer)
     def move(self):
+        move = ""
         if self.turn % 2 == 0: 
             im =self.cvDest 
             image = proecssImage(im)        
@@ -163,6 +173,7 @@ class App:
 
             turk_move = ia_funcions.Player_moves(self.Board,legal_move)
             print(turk_move)
+            move  = turk_move
             if legal_move != "":
                 self.Board.push(chess.Move.from_uci(legal_move))
                 self.Board.push(chess.Move.from_uci(turk_move))
@@ -171,16 +182,23 @@ class App:
             im =self.cvDest 
             image = proecssImage(im)        
             self.last_move = image 
+            move = "your turn!"
+
         self.turn+=1
+        return move
 
     def hint(self):
         best_move = ia_funcions.getHintMove(self.Board.fen())
         print(best_move)
+        return best_move
 
     def undo(self):
         self.Board.pop() 
         if self.turn % 2 == 0: 
             self.Board.pop()
+        im =self.cvDest 
+        image = proecssImage(im)        
+        self.last_move = image 
 
 def run():
     app = App()

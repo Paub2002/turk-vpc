@@ -1,8 +1,8 @@
 # si no chuta, pot caler instalar:
 # pip install pyserial
 
-import serial
-import serial.tools.list_ports
+# import serial
+# import serial.tools.list_ports
 import sympy as sp   # library for symbolic calculation
 import numpy as np
 from sympy import *

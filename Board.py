@@ -441,8 +441,10 @@ def GeneratePoints(im):
    pointmask = ~pointmask
    points = points[pointmask]
    return points
-def AutoGetHomography(): 
-    captura = cv.VideoCapture(1)
+def AutoGetHomography(captura): 
+    #Frame Reading
+
+    # captura = cv.VideoCapture(1)
     frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
     # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
     # plt.imshow(frame)
@@ -451,7 +453,7 @@ def AutoGetHomography():
 
 
     # we define the colors 
-    red_low  = np.array([ 150,  90,  90 ])
+    red_low  = np.array([ 150, 70,  70 ])
     red_upp  = np.array([ 255, 150, 150 ])
     blue_low = np.array([ 80, 200, 200 ])
     blue_upp = np.array([ 150, 255, 255 ])
@@ -484,6 +486,7 @@ def AutoGetHomography():
 
     M,_ = cv.findHomography(coords,dst)
     dst = cv.warpPerspective(frame, M, (512,512))
+
     return M
 
 
@@ -491,11 +494,11 @@ def main():
 
     #Frame Reading
 
-    # captura = cv.VideoCapture(1)
-    # frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
-    frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
-    # plt.imshow(frame)
-    # plt.show()
+    captura = cv.VideoCapture(1)
+    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    plt.imshow(frame)
+    plt.show()
     # showHist(frame)
 
 
@@ -551,8 +554,8 @@ def main():
 def find2ColorPoints(frame,low,up): 
 
     mask = cv.inRange(frame,low,up)
-    plt.imshow(mask)
-    plt.show()
+    # plt.imshow(mask)
+    # plt.show()
     contours,_= cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
     areas = []

@@ -3,14 +3,14 @@ import chess
 import chess.engine
 import request
 import speech
-import serial_com_python
+# import serial_com_python
 
 LEVE_ERROR = 20
 ERROR = 50
 GRAVE_ERROR = 150
 
-#stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
-stockfish = Stockfish(path="stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+# stockfish = Stockfish(path="C:\Users\pcb20\Desktop\turk-vpc\turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
 
 board_indices = [
 "h1","g1","f1","e1","d1","c1","b1","a1",

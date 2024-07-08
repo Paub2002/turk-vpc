@@ -1,5 +1,6 @@
 from stockfish import Stockfish
 import chess
+import chess.engine
 import request
 import speech
 import serial_com_python
@@ -139,6 +140,27 @@ def final_message(winner):
         text = "uff la partida no se ha podido acabar, pero estoy seguro de que te iba a ganar"
     speech.text_to_speech(text)
 
+def game_over(fen):
+    board = chess.Board(fen)
+
+    # Verificar el estado del juego
+    if board.is_checkmate():
+        print("Jaque mate.")
+    elif board.is_stalemate():
+        print("Tablas por ahogado.")
+    elif board.is_insufficient_material():
+        print("Tablas por insuficiencia de material.")
+    elif board.is_seventyfive_moves():
+        print("Tablas por la regla de los 75 movimientos.")
+    elif board.is_fivefold_repetition():
+        print("Tablas por la regla de la repetición quíntuple.")
+    elif board.is_variant_draw():
+        print("Tablas por la regla variante.")
+    else:
+        print("La partida continúa.")
+    
+
+
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
 def main_loop(board,move):
     bad_move = False
@@ -223,6 +245,7 @@ def Player_moves(board,move):
     text = "Moveré la pieza en la posición " + turk_move[:2] + " a la posición " + turk_move[-2:]
     speech.text_to_speech(text)
     #serial_com_python.movement(str(robotCoords))
+    
 
     return turk_move
 
@@ -237,3 +260,4 @@ scara.endSerial()"""
 stockfish.set_fen_position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 turk_move = stockfish.get_best_move()
 print("Moveré la pieza en la posición " + turk_move[:2] + " a la posición " + turk_move[-2:])
+game_over(stockfish.get_fen_position())

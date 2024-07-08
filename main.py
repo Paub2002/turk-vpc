@@ -1,5 +1,5 @@
 import threading
-import newUI
+import UI
 import server
 import os
 files = [
@@ -11,7 +11,7 @@ dir = os.listdir()
 for f in files: 
     if f in dir: os.remove(f) 
 
-t1 = threading.Thread(target = newUI.run)
+t1 = threading.Thread(target = UI.run)
 t2 = threading.Thread(target = server.runApp)
 t1.start()
 t2.start()

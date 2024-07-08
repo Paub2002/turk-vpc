@@ -6,15 +6,11 @@ import cv2
 import Board
 import chess
 import chess.svg
-# import ia_funcions
+import os
+import ia_funcions
 
 ###########TODO####################
-#
-# - Remove buttons 
-# - Add file listener
-# - button action into file 
-# - undo functionality 
-# - hint functionality ( conexion ) 
+# - Tests 
 # - Detecció de colors. 
 #
 ##################################
@@ -34,7 +30,6 @@ board_indices = [
     "h8","g8","f8","e8","d8","c8","b8","a8"
 
 ]
-
 def capture_frame(capture):
     return cv2.cvtColor(capture.read()[1],cv2.COLOR_BGR2RGB)
 
@@ -69,8 +64,6 @@ def getLegalMove(board,sorted_squares):
         
     ia_funcions.ilegalMove(move)
     return ""
-
-# App Class 
 class App: 
     def __init__(self): 
         
@@ -78,45 +71,77 @@ class App:
         self.root.title("Calibra al MechanicalTurkChessProMaster2000")
         self.captura = cv2.VideoCapture(1)
         # Initializamos objetos tk
-        self.placeholder =      ImageTk.PhotoImage(Image.open("check.jpg"))
         self.video_frame =      Label(self.root)                             # Frame for video input
-        self.transform_frame =  Label(self.root,image=self.placeholder)      # Frame for transformed input 
+        self.transform_frame =  Label(self.root)                             # Frame for transformed input 
 
-        self.points_frame = LabelFrame(self.root,text="Selected Points: ")                  # Frame for poitns
-        self.go_button =  Button(self.points_frame, text="CONTINUA",command=self.nextStage) # Button for starting transformation
-        self.moveButton = Button(self.points_frame, text="MOVE",    command=self.getMove)   # Button for starting transformation
-        self.hintButton = Button(self.points_frame, text="HINT",    command=self.getHint)   # Button for starting transformation
+        self.go_button =  Button(self.root, text="CONTINUA",command=self.getHomography) # Button for starting transformation
 
         # Mostramos Objetos TK 
         self.video_frame.grid(row=0,column=0,sticky=E)
-        self.points_frame.grid(row=0,column=1,sticky=NW,rowspan=3)
         self.transform_frame.grid(row=0,column=2,sticky=W) 
-        self.moveButton.grid(row= 10)
-        self.hintButton.grid(row=15)
+        self.go_button.grid(row=16)
 
-        # Inicializaoms los puntos a seleccionar
-        point0 = point(self.points_frame,-1,-1,"H8",0)
-        point1 = point(self.points_frame,-1,-1,"A8",1)
-        point2 = point(self.points_frame,-1,-1,"H1",2)
-        point3 = point(self.points_frame,-1,-1,"A1",3)
-
-        self.selected_points = [point0,point1,point2,point3]
+        # Demas variables 
         self.TMat = None
-        self.coords = None
         self.turn = 0
-        self.dstPoints = np.array([[0,512],[512,512],[0,0],[512,0]])
         self.lattice_lines = Board.getLatticeLines(np.array([0,0]),np.array([0,512]),np.array([512,0]),np.array([512,512]))
         self.mask = getMask(512)
+
         # Bindings de teclas. 
-        self.video_frame.bind('<Button-1>',self.addPoint) # Registra un punto al hacer clic derecho
         self.root.bind('<Escape>',quit)                   # Esc Cierra la aplicacion 
 
         self.video_frame.after(10,self.showFrame)
+        self.root.after(20,self.checkServer)
 
         self.Board = chess.Board()
         self.transform = False
+        self.getHomography()
+        self.cvImage = capture_frame(self.captura)
+        wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
+        self.cvDest = wraped
+        self.last_move = proecssImage(wraped)
 
-    def getMove(self): 
+    def getHomography(self):
+        self.TMat =  Board.AutoGetHomography(self.captura)
+
+    def showFrame(self): 
+
+        self.cvImage = capture_frame(self.captura)
+        wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
+        self.cvDest = wraped
+
+        dst = wraped.copy()
+        dst[self.mask,:] = 0
+
+        image = Image.fromarray(self.cvImage)
+        dst = Image.fromarray(dst)
+
+        img = ImageTk.PhotoImage(image = image)
+        dst = ImageTk.PhotoImage(image = dst)
+
+        self.capture_image= img
+        self.transform_image= dst
+        
+        self.video_frame.configure(image=img)
+        self.transform_frame.configure(image=dst)
+        
+        self.video_frame.after(10,self.showFrame)
+
+    def checkServer(self): 
+        dir = os.listdir()
+        if 'move_req.txt' in dir: 
+            self.move() 
+            os.remove('move_req.txt')
+
+        if 'hint_req.txt' in dir: 
+            self.hint() 
+            os.remove('hint_req.txt')
+        if 'undo_req.txt' in dir: 
+            self.undo() 
+            os.remove('undo_req.txt')
+
+        self.root.after(20,self.checkServer)
+    def move(self):
         if self.turn % 2 == 0: 
             im =self.cvDest 
             image = proecssImage(im)        
@@ -148,111 +173,18 @@ class App:
             self.last_move = image 
         self.turn+=1
 
-    def getHint(self):
+    def hint(self):
         best_move = ia_funcions.getHintMove(self.Board.fen())
         print(best_move)
-        #hint_move = ia_funcions.stockfish.get_best_move()
 
-    def showFrame(self): 
-        self.cvImage = capture_frame(self.captura)
+    def undo(self):
+        self.Board.pop() 
+        if self.turn % 2 == 0: 
+            self.Board.pop()
 
-        image = Image.fromarray(self.cvImage)
-        img = ImageTk.PhotoImage(image = image)
-
-        self.capture_image= img
-        self.video_frame.configure(image=img)
-        self.video_frame.after(10,self.showFrame)
-
-    # Calcula la transformada del frame i lo muestra en el recuadro adecuado
-    def showTransform(self): 
-        wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
-        self.cvDest = wraped
-        dst = wraped.copy()
-        dst[self.mask,:] = 0
-        image = Image.fromarray(dst)
-        dst = ImageTk.PhotoImage(image = image)
-        self.transform_image= dst 
-        self.transform_frame.configure(image=dst)
-        if self.transform == True : self.transform_frame.after(30,self.showTransform)
-
-    # Completa la calibracion y muestra la transformacion 
-    def oldnextStage(self):
-        coords = []
-        for point in self.selected_points:
-            coords.append( [ point.getCoord() ] )
-        coords = np.array(coords)
-        self.coords = coords
-        M,_ = cv2.findHomography(self.coords,self.dstPoints)
-        self.TMat = M
-        self.video_frame.after(10,self.showTransform)
-        dst = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
-        self.cvDest = dst
-        self.last_move =proecssImage(dst)
-        self.transform = True
-    def nextStage(self):
-        M =  Board.AutoGetHomography(self.captura)
-        self.TMat = M
-        self.video_frame.after(10,self.showTransform)
-        dst = cv2.warpPerspective(self.cvImage, M, (512,512))
-        self.cvDest = dst
-        self.last_move =proecssImage(dst)
-        self.transform = True
-
-    # Añade las coordenadas a un punto nuevo 
-    def addPoint(self,event): 
-        for p in self.selected_points:
-            if not p.selected: 
-                p.setCoord(event.x,event.y)
-                break
-        for p in self.selected_points:
-            if not p.selected: 
-                return
-        # Si todos los puntos estan seleccionados muestra el boton para terminar la calibracion 
-        self.spawnButton()
-
-    # Muestra el boton 
-    def spawnButton(self):
-        self.go_button.grid(sticky=S + W + E)
-
-#Point Class 
-class point: 
-    def __init__(self,parent,x,y,cornerTag,row): 
-        self.y = y
-        self.selected = False 
-        self.corner_tag = cornerTag
-        text = "Corner {0}:".format(cornerTag)
-        
-        # Inicializamos los objetos TK 
-        self.point_label = Label(parent,text= text)
-        self.delete_button = Button(parent,text="X",command=self.unselect)
-
-        # Mostramos los objetos TK 
-        self.point_label.grid(row=row,column=0,sticky=W)
-        self.delete_button.grid(row=row,column=1,sticky=E )
-
-    # Deselecciona el punto, borra sus coordenadas. Llamada al hacer clic en el boton de la cruz
-    def unselect(self): 
-
-        self.x = -1
-        self.y = -1
-        self.selected = False
-        text = "Corner {0}:".format(self.corner_tag)
-        self.point_label.configure(text =text )
-
-    def getCoord(self):
-        return self.x,self.y
-
-    # Setea las coordenadas y actualiza el texto
-    def setCoord(self,x,y): 
-        self.x = x
-        self.y = y
-        self.selected = True
-        text = "Corner {0}: ({1}, {2})".format(self.corner_tag,x,y)
-        self.point_label.configure(text =text )
-
-def main():
+def run():
     app = App()
     mainloop()
 if __name__ == "__main__": 
-    main()
+    run()
         

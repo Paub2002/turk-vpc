@@ -6,15 +6,11 @@ import cv2
 import Board
 import chess
 import chess.svg
-# import ia_funcions
+import os
+import ia_funcions
 
 ###########TODO####################
-#
-# - Remove buttons 
-# - Add file listener
-# - button action into file 
-# - undo functionality 
-# - hint functionality ( conexion ) 
+# - Tests 
 # - Detecció de colors. 
 #
 ##################################
@@ -95,10 +91,15 @@ class App:
         self.root.bind('<Escape>',quit)                   # Esc Cierra la aplicacion 
 
         self.video_frame.after(10,self.showFrame)
+        self.root.after(20,self.checkServer)
 
         self.Board = chess.Board()
         self.transform = False
         self.getHomography()
+        self.cvImage = capture_frame(self.captura)
+        wraped = cv2.warpPerspective(self.cvImage, self.TMat, (512,512))
+        self.cvDest = wraped
+        self.last_move = proecssImage(wraped)
 
     def getHomography(self):
         self.TMat =  Board.AutoGetHomography(self.captura)
@@ -126,9 +127,64 @@ class App:
         
         self.video_frame.after(10,self.showFrame)
 
-def main():
+    def checkServer(self): 
+        dir = os.listdir()
+        if 'move_req.txt' in dir: 
+            self.move() 
+            os.remove('move_req.txt')
+
+        if 'hint_req.txt' in dir: 
+            self.hint() 
+            os.remove('hint_req.txt')
+        if 'undo_req.txt' in dir: 
+            self.undo() 
+            os.remove('undo_req.txt')
+
+        self.root.after(20,self.checkServer)
+    def move(self):
+        if self.turn % 2 == 0: 
+            im =self.cvDest 
+            image = proecssImage(im)        
+            diffs = image - self.last_move
+            m = np.logical_and( diffs > 10,diffs < 240) 
+            diffs[~m] = 0 
+            diffs[m] = 255
+
+            # plt.imshow(diffs)
+            # plt.show()
+            squares = Board.splitquare(diffs)
+            self.last_move = image 
+            
+            means = np.mean(squares,axis=(1,2))
+            a = means.argsort()
+
+            legal_move = getLegalMove(self.Board, a )
+            #self.display_move(legal_move)
+
+            turk_move = ia_funcions.Player_moves(self.Board,legal_move)
+            print(turk_move)
+            if legal_move != "":
+                self.Board.push(chess.Move.from_uci(legal_move))
+                self.Board.push(chess.Move.from_uci(turk_move))
+                print(chess.Move.from_uci(legal_move))
+        else: 
+            im =self.cvDest 
+            image = proecssImage(im)        
+            self.last_move = image 
+        self.turn+=1
+
+    def hint(self):
+        best_move = ia_funcions.getHintMove(self.Board.fen())
+        print(best_move)
+
+    def undo(self):
+        self.Board.pop() 
+        if self.turn % 2 == 0: 
+            self.Board.pop()
+
+def run():
     app = App()
     mainloop()
 if __name__ == "__main__": 
-    main()
+    run()
         

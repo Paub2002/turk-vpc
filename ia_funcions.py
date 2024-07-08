@@ -8,8 +8,8 @@ LEVE_ERROR = 20
 ERROR = 50
 GRAVE_ERROR = 150
 
-#stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
-stockfish = Stockfish(path="stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+stockfish = Stockfish(path="turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
+# stockfish = Stockfish(path="C:\Users\pcb20\Desktop\turk-vpc\turk-vpc\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe", depth=7)
 
 board_indices = [
 "h1","g1","f1","e1","d1","c1","b1","a1",
@@ -220,7 +220,7 @@ def Player_moves(board,move):
 
 
 
-scara = serial_com_python.SerialCom()
-scara.startSerial()
-scara.writeSerial("7007")
-scara.endSerial()
+# scara = serial_com_python.SerialCom()
+# scara.startSerial()
+# scara.writeSerial("7007")
+# scara.endSerial()

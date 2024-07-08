@@ -21,6 +21,8 @@ def runApp():
             time.sleep(2)
         res = open("move_res.txt",'r')
         move = res.read() 
+        res.close()
+        os.remove("move_res.txt")
         message  ='Move action executed successfully, move sent: ' + move 
 
         return jsonify({'message': message })
@@ -35,8 +37,10 @@ def runApp():
         while ( not response): 
             if "hint_res.txt" in os.listdir(): response = True  
             time.sleep(2)
-        res = open("hitnt_res.txt",'r')
+        res = open("hint_res.txt",'r')
         move = res.read() 
+        res.close()
+        os.remove("hint_res.txt")
         message  ='Hint action executed successfully, hint: ' + move 
 
         return jsonify({'message': message })
@@ -53,6 +57,8 @@ def runApp():
             time.sleep(2)
         res = open("undo_res.txt",'r')
         move = res.read() 
+        res.close()
+        os.remove("undo_res.txt")
         message  ='Undo action executed successfully.'
 
         return jsonify({'message': message })

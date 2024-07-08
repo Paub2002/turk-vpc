@@ -3,9 +3,9 @@ import newUI
 import server
 import os
 files = [
- ' move_req.txt','move_res.txt',
- ' hint_req.txt','hint_res.txt',
- ' undo_req.txt','undo_res.txt',
+ 'move_req.txt','move_res.txt',
+ 'hint_req.txt','hint_res.txt',
+ 'undo_req.txt','undo_res.txt',
 ]
 dir = os.listdir()
 for f in files: 

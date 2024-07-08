@@ -130,8 +130,14 @@ def ilegalMove(move):
     text = "Si mueves la pieza en la posición " + posicion[0] + " a la posición " + posicion[1] + " sería un movimiento ilegal, mameluco"
     speech.text_to_speech(text)
 
-
-
+def final_message(winner):
+    if winner == "turk":
+        text = "Jajaja, he ganado yo, como era de esperar. Mucha suerte la proxima vez"
+    elif winner == "player":
+        text = "Debo admitrlo me has ganado, aunque haya sido por suerte"
+    else:
+        text = "uff la partida no se ha podido acabar, pero estoy seguro de que te iba a ganar"
+    speech.text_to_speech(text)
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
 def main_loop(board,move):
@@ -214,13 +220,20 @@ def Player_moves(board,move):
     robot_move = separateMove(turk_move)
     robotCoords = toRobotIndices(robot_move)
     print("DANI: ", robotCoords)
+    text = "Moveré la pieza en la posición " + turk_move[:2] + " a la posición " + turk_move[-2:]
+    speech.text_to_speech(text)
     #serial_com_python.movement(str(robotCoords))
 
     return turk_move
 
 
 
-scara = serial_com_python.SerialCom()
+"""scara = serial_com_python.SerialCom()
 scara.startSerial()
 scara.writeSerial("7007")
-scara.endSerial()
+scara.endSerial()"""
+
+
+stockfish.set_fen_position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+turk_move = stockfish.get_best_move()
+print("Moveré la pieza en la posición " + turk_move[:2] + " a la posición " + turk_move[-2:])

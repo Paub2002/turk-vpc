@@ -1,8 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import io 
 import os
-import time
+from time import sleep 
 
 def runApp():
     app = Flask(__name__)
@@ -18,7 +17,7 @@ def runApp():
         response = False
         while ( not response): 
             if "move_res.txt" in os.listdir(): response = True  
-            time.sleep(2)
+            sleep(2)
         res = open("move_res.txt",'r')
         move = res.read() 
         res.close()
@@ -36,7 +35,7 @@ def runApp():
         response = False
         while ( not response): 
             if "hint_res.txt" in os.listdir(): response = True  
-            time.sleep(2)
+            sleep(2)
         res = open("hint_res.txt",'r')
         move = res.read() 
         res.close()
@@ -54,7 +53,7 @@ def runApp():
         response = False
         while ( not response): 
             if "undo_res.txt" in os.listdir(): response = True  
-            time.sleep(2)
+            sleep(2)
         res = open("undo_res.txt",'r')
         move = res.read() 
         res.close()

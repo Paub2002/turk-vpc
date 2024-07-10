@@ -16,6 +16,5 @@ pip install -r requeriments.txt
 
 
 ## USAGE 
-### Camera Placement
 ### Camera calibration 
 ### Game 

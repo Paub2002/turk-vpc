@@ -1,5 +1,4 @@
 import os
-#import request
 from pydub import AudioSegment
 from pydub.playback import play
 from google.cloud import texttospeech

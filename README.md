@@ -15,10 +15,7 @@ pip install -r requeriments.txt
 
 
 
-## USAGE 
-### Camera Placement
-### Camera calibration 
-### Game 
+## SETUP
 
 ## FFMPEG INSTALLATION
 ### Go to this link https://github.com/BtbN/FFmpeg-Builds/releases

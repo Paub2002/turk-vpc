@@ -7,11 +7,40 @@ Created on Sun May 19 15:55:37 2024
 """
 import numpy as np
 import cv2 as cv
-from itertools import product
 from matplotlib import pyplot as plt
 
-## IMAGE TREATMENT FUNCTIONS ====================================================================================================================
-##===============================================================================================================================================
+def getLatticeLines(TL,TR,DL,DR):
+    # Generate lattice lines for the debug display
+    # Get the points : 
+    T = TR - TL
+    tu = T/ 8
+    D = DR - DL
+    du = D / 8
+    R = DR - TR
+    ru = R / 8
+    L = DL - TL 
+    lu = L / 8
+    
+    newT = [TL]
+    newD = [DL]
+    newR = [TR]
+    newL = [TL]
+    
+    for n in range(8): 
+        newT.append( TL + (n + 1) * tu )
+        newD.append( DL + (n + 1) * du )
+        newR.append( TR + (n + 1) * ru )
+        newL.append( TL + (n + 1) * lu )
+    
+    newT =np.array(newT)
+    newD =np.array(newD)
+    newR =np.array(newR) 
+    newL =np.array(newL) 
+    v_lines = np.concatenate([newT,newD],axis=1)
+    h_lines = np.concatenate([newR,newL],axis=1)
+
+    return np.concatenate([v_lines,h_lines]).astype(np.uint8)
+
 def openResidue(im):
     gray = cv.cvtColor(im,cv.COLOR_BGR2GRAY)
     
@@ -37,15 +66,7 @@ def splitquare(im):
 
 def AutoGetHomography(captura): 
     #Frame Reading
-
-    # captura = cv.VideoCapture(1)
     frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
-    # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
-    # plt.imshow(frame)
-    # plt.show()
-    # showHist(frame)
-
-
     # we define the colors 
     red_low  = np.array([ 150, 70,  70 ])
     red_upp  = np.array([ 255, 150, 150 ])

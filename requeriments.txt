@@ -5,3 +5,8 @@ stockfish
 google.generativeai
 pydub
 google.cloud.texttospeech
+PIL
+numpy 
+textwrap
+matplotlib
+

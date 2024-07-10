@@ -10,6 +10,7 @@ files = [
  'move_req.txt','move_res.txt', # Move files
  'hint_req.txt','hint_res.txt', # Hint files
  'undo_req.txt','undo_res.txt', # Undo files
+ 'output.mp3'                   # Audio file 
 ]
 # List of all directory content
 dir = listdir()

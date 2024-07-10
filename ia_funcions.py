@@ -160,63 +160,6 @@ def game_over(fen):
         print("La partida continúa.")
     
 
-
-#/////////////////////////////////////////////////////////////////////////////////////////////////////////
-def main_loop(board,move):
-    bad_move = False
-    #stockfish.set_skill_level(4)
-    stockfish.set_elo_rating(2000)
-    
-    stockfish.set_fen_position(board.fen())
-    #print(stockfish.get_board_visual())
-    best_move = stockfish.get_best_move()
-
-    initial_position = move[:2]
-    final_position = move[-2:]
-
-    #turn 1 = negras |turn 0 = blancas
-    turn = es_negra(board, initial_position)
-
-    if turn == player_color:
-        initial_player = stockfish.get_evaluation()
-        print("initial player: ", initial_player)
-        print(move)
-
-        stockfish.make_moves_from_current_position([move])
-        print(stockfish.get_board_visual())
-
-        initial_turk = stockfish.get_evaluation()
-        print("initial turk: ", initial_turk)
-
-        points = abs(initial_turk['value'] - initial_player['value'])
-        print("initial_points: ", initial_player['value'], "final_points: ", initial_turk["value"])
-        print("Points: ", points)
-        
-        if points >= GRAVE_ERROR:
-            bad_move = True
-
-        if bad_move:
-            player_move_alg = alg_to_alg(move, board)
-            best_move_alg = alg_to_alg(best_move, board)
-            text = request.chess_question(board.fen(), player_move_alg, best_move_alg)
-            speech.text_to_speech(text)
-            print("Bad Move ma boy")
-        else:
-            print("Gooooooz cabrón")
-
-        best_move = stockfish.get_best_move()
-        #best_move="d6d8"
-        #ROBOT best_move
-        print(best_move)
-        stockfish.make_moves_from_current_position([best_move])
-
-        print(stockfish.get_board_visual())
-
-        final_player = stockfish.get_evaluation()
-
-        print("final player: ", final_player)
-    return stockfish.get_fen_position()
-
 def Player_moves(board,move): 
 
     stockfish.set_elo_rating(2000)

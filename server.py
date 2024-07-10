@@ -9,15 +9,18 @@ def runApp():
 
     @app.route('/move', methods=['GET'])
     def move():
-        # Lógica para manejar la acción "move"
+        """Funcion per a manejar la acción move"""
+        # Genera la peticio per a la logica
         f = open("move_req.txt","w",encoding='utf-8')
         f.write("m")
         f.close()
 
+        # Espera fins que el fitxer de resposta es generat
         response = False
         while ( not response): 
             if "move_res.txt" in os.listdir(): response = True  
             sleep(2)
+        # Llegeix el fitxer de resposta i construeix el missatge de retorn
         res = open("move_res.txt",'r')
         move = res.read() 
         res.close()
@@ -28,14 +31,20 @@ def runApp():
 
     @app.route('/hint', methods=['GET'])
     def hint():
+        """Funcion per a manejar la acción hint"""
+        # Genera la peticio per a la logica
         f = open("hint_req.txt","w",encoding='utf-8')
         f.write("h")
         f.close()
 
+
+        # Espera fins que el fitxer de resposta es generat
         response = False
         while ( not response): 
             if "hint_res.txt" in os.listdir(): response = True  
             sleep(2)
+        
+        # Llegeix el fitxer de resposta i construeix el missatge de retorn
         res = open("hint_res.txt",'r')
         move = res.read() 
         res.close()
@@ -46,14 +55,18 @@ def runApp():
 
     @app.route('/undo', methods=['GET'])
     def undo():
+        """Funcion per a manejar la acción undo"""
+        # Genera la peticio per a la logica
         f = open("undo_req.txt","w",encoding='utf-8')
         f.write("u")
         f.close()
 
+        # Espera fins que el fitxer de resposta es generat
         response = False
         while ( not response): 
             if "undo_res.txt" in os.listdir(): response = True  
             sleep(2)
+        # Llegeix el fitxer de resposta i construeix el missatge de retorn
         res = open("undo_res.txt",'r')
         move = res.read() 
         res.close()

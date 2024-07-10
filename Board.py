@@ -111,13 +111,27 @@ def AutoGetHomography(captura):
 def correctSide(wSplit, bSplit): 
     return wSplit.mean() < bSplit.mean()
 
+def proecssImage(image):
+    """Aplica un pequeño preproceso a las imagenes de los movimientos para que las comparaciones sean mas claras
+
+    Args:
+        image (cv2 image): Imagen a la que se le va a aplicar el processado
+
+    Returns:
+        Imagen processada
+    """
+    im = cv.cvtColor(image,cv.COLOR_RGB2GRAY)
+    Blured  = cv.GaussianBlur(im,(21,21),0)
+    plt.imshow(im,'gray')
+    plt.show()
+    return Blured
 def main():
 
     #Frame Reading
 
-    captura = cv.VideoCapture(1)
-    frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
-    # frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
+    # captura = cv.VideoCapture(1)
+    # frame = cv.cvtColor(captura.read()[1],cv.COLOR_BGR2RGB)
+    frame = cv.cvtColor(cv.imread('no-cam.png'),cv.COLOR_BGR2RGB)
     plt.imshow(frame)
     plt.show()
     # showHist(frame)
@@ -171,13 +185,16 @@ def main():
     plt.show()
     plt.imshow(dst)
     plt.show()
+    proecssImage(dst)
+
 
 def find2ColorPoints(frame,low,up): 
 
     mask = cv.inRange(frame,low,up)
-    # plt.imshow(mask)
-    # plt.show()
+    plt.imshow(mask)
+    plt.show()
     contours,_= cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
 
     areas = []
     for c in contours : areas.append(cv.contourArea(c))

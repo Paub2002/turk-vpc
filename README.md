@@ -37,6 +37,28 @@ Install the required packages
 pip install -r requirements.txt
 ```
 # Documentation
+## Computer vision
+
+### Board detection
+<img src=".\docs\images\raw.png">
+
+- From the raw image we apply color filters in order to get the color ponts possitions. 
+
+<img src=".\docs\images\mask1.png">
+<img src=".\docs\images\mask2.png">
+
+- Using bloc detection functions we locate the centers of the points 
+
+<img src=".\docs\images\detection.png">
+
+- We correct board orientation and calculate the homography 
+
+<img src=".\docs\images\result.png">
+
+- Before move comparasion some filters ara applied
+
+<img src=".\docs\images\final_processed.png">
+
 # How To Use
 ## Setup
 

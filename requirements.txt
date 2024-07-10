@@ -5,8 +5,7 @@ stockfish
 google.generativeai
 pydub
 google.cloud.texttospeech
-PIL
+pillow
 numpy 
-textwrap
 matplotlib
 

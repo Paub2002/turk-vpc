@@ -34,7 +34,7 @@ Features:
 Install the required packages 
 
 ```
-pip install -r requeriments.txt
+pip install -r requirements.txt
 ```
 # Documentation
 # How To Use

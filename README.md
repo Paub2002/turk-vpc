@@ -59,6 +59,10 @@ pip install -r requirements.txt
 
 <img src=".\docs\images\final_processed.png">
 
+### Flux Diagram 
+
+<img src=".\docs\images\image.png">
+
 # How To Use
 ## Setup
 

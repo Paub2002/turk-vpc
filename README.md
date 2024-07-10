@@ -62,7 +62,11 @@ pip install -r requirements.txt
 # How To Use
 ## Setup
 
-### Fisical setup : 
+### Fisical setup:
+1. Make sure that all servos are connected correctly to the protoboard or motorshield as shown in the Fritzing image.
+2. Once everything is connected properly, the TurkProEvolutionChess arm will start moving to its default position.
+3. When the arm stops moving, move the finger to be perpendicular to the chessboard. While doing this, plug in the finger servo gear.
+4. Congratulations! You have configured the robot correctly.
 
 #### Robot
 #### Board 

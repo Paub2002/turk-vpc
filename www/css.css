@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Open Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    font-variation-settings:
+        "wdth" 100;
+    font-size: .95em;
+}
+
+
+body {
+    background-color: #fffcef;
+    height: 90vh;
+    width: 100vw;
+}
+
+#buttonContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%; 
+    width: 300px;
+    height: 400px;
+    margin-top: -200px;
+    margin-left: -150px;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.style {
+
+    color: #515151;
+    font-weight: 200;
+    
+    border-style: none;
+    background-color: transparent;
+
+    width: 90%;
+
+    margin: 5px;
+    padding: 10px;
+
+    background-color: rgb(0, 0, 0, .07);
+    border-radius: 10px;
+
+    transition: .2s;
+}
+
+#serverAddress {
+    display: inline-block;
+    box-sizing: border-box;
+
+    outline-width: 1px;
+    outline-color: #00b1b6;
+
+    margin-bottom: 15px;
+}
+
+button:hover {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+img {
+    position: absolute;
+    margin-top: 60px;
+    left: 50%;
+    margin-left: -50px;
+}

@@ -49,6 +49,11 @@ pip install -r requirements.txt
 - Place two red points in h file and two blue points in a file. 
 - Assure that the camera has a and unobstructed view of the board and the color points. 
 
+#### Software
+- Start a web service. For example using apache. 
+- Set your web folder to the www folder of the repo
+- run main.py
+- check that the board has been detected okey if not clic continue. If it does not detect the color points change the thresholds in Board.py:AutoBoardDetect function.  
 ## Gameplay
 
 - Player starts by moving a white piece and selecting move on the web app. 

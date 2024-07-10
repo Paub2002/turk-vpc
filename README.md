@@ -39,4 +39,21 @@ pip install -r requirements.txt
 # Documentation
 # How To Use
 ## Setup
+
+### Fisical setup : 
+
+#### Robot
+#### Board 
+- Place the board in front of the robot with a file touching the robot and 1s row at robots left : 
+
+- Place two red points in h file and two blue points in a file. 
+- Assure that the camera has a and unobstructed view of the board and the color points. 
+
 ## Gameplay
+
+- Player starts by moving a white piece and selecting move on the web app. 
+- The robot will say it's move and point it. 
+- Make the robot's move and select move on the app. 
+- Make your move, aand you know. 
+
+When the player makes a mistake the Robot will explain it and when the game ends he will anounce it also.  
